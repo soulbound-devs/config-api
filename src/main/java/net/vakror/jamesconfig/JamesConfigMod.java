@@ -13,8 +13,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.vakror.jamesconfig.config.Config;
+import net.vakror.jamesconfig.config.Events;
 import net.vakror.jamesconfig.config.event.ConfigRegisterEvent;
-import net.vakror.jamesconfig.config.example.Events;
+import net.vakror.jamesconfig.config.example.ExampleConfigs;
+import net.vakror.jamesconfig.config.manager.MasterConfigManager;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -35,10 +37,13 @@ public class JamesConfigMod
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         // Register the commonSetup method for modloading
-        modEventBus.addListener(this::commonSetup);
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, Events.ModEvents::onConfigsRegister);
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, Events.ModEvents::onGetConfigTypeAdapters);
+        modEventBus.addListener(EventPriority.LOWEST, this::commonSetup);
+        modEventBus.addListener(Events.ModEvents::registerSimpleManager);
 
+        //Call this in mod constructor or anywhere before commonsetup fires
+        ExampleConfigs.addExampleConfig();
+
+        MasterConfigManager.register();
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }

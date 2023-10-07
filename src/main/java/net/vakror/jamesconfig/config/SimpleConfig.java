@@ -1,7 +1,6 @@
 package net.vakror.jamesconfig.config;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.vakror.jamesconfig.config.event.GetConfigTypeAdaptersEvent;
 
