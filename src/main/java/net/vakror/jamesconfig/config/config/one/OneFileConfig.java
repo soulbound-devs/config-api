@@ -118,8 +118,6 @@ public abstract class OneFileConfig<P> extends Config<P> {
     @Override
     protected abstract void resetToDefault();
 
-    public abstract Class<P> getConfigClass();
-
     @Override
     public void writeConfig() {
         File cfgDir = this.getConfigDir();

@@ -35,9 +35,4 @@ public class ExampleOneFileConfig extends SimpleOneFileConfig<StringWithContents
         STRINGS.add(new StringWithContents("here is an example!", "these are all in ONE file, not multiple as you can see in the other config!"));
         STRINGS.add(new StringWithContents("important", "this can become messy with a lot of config objects though"));
     }
-
-    @Override
-    public Class<StringWithContents> getConfigClass() {
-        return StringWithContents.class;
-    }
 }
