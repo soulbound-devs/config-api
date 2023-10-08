@@ -16,11 +16,6 @@ import java.util.Map;
 
 public abstract class ConfigManager {
 
-    public abstract void addConfig(Config<?> individualFileConfig, Pair<Type, Object>... adapters);
-    public abstract void addConfig(Config<?> individualFileConfig, Type type, Object adaptersArray);
-    public abstract void addCodecConfig(Config<?> individualFileConfig, Pair<Type, Codec<?>>... codecArray);
-    public abstract void addCodecConfig(Config<?> individualFileConfig, Type type, Codec<?> adaptersArray);
-
     public void register() {
         FMLJavaModLoadingContext.get().getModEventBus().register(new ModEvents(this));
     }

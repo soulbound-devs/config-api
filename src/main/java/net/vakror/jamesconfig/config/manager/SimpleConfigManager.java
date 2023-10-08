@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimpleConfigManager extends ConfigManager {
+public class SimpleConfigManager extends ConfigManager implements WithAdapter{
 
     public static final SimpleConfigManager INSTANCE = new SimpleConfigManager();
 
