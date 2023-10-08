@@ -9,6 +9,6 @@ import net.vakror.jamesconfig.config.manager.SimpleConfigManager;
 public class ExampleConfigs {
     public static void addExampleConfig() {
         SimpleConfigManager.INSTANCE.addConfig(new ExampleIndividualFileConfig(), StringWithContents.class, new SimpleCodecAdapter<>(StringWithContents.CODEC));
-        SimpleConfigManager.INSTANCE.addConfig(new ExampleOneFileConfig(), StringWithContents.class, new SimpleCodecAdapter<>(StringWithContents.CODEC));
+        SimpleConfigManager.INSTANCE.addConfig(ExampleOneFileConfig.INSTANCE, StringWithContents.class, new SimpleCodecAdapter<>(StringWithContents.CODEC));
     }
 }

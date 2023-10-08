@@ -15,6 +15,8 @@ public class ExampleOneFileConfig extends SimpleOneFileConfig<StringWithContents
         super(StringWithContents.CODEC, "example/one_config", NAME);
     }
 
+    public static final ExampleOneFileConfig INSTANCE = new ExampleOneFileConfig();
+
     @Expose
     //MUST NOT BE STATIC
     //you can use a static instance field to access these configs from
