@@ -12,7 +12,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.vakror.jamesconfig.config.Config;
+import net.vakror.jamesconfig.config.config.Config;
 import net.vakror.jamesconfig.config.Events;
 import net.vakror.jamesconfig.config.event.ConfigRegisterEvent;
 import net.vakror.jamesconfig.config.example.ExampleConfigs;
