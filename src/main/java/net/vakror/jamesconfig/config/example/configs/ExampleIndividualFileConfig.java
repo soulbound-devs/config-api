@@ -10,7 +10,7 @@ import java.util.List;
 public class ExampleIndividualFileConfig extends SimpleIndividualFileConfig<StringWithContents> {
     public static final ResourceLocation NAME = new ResourceLocation(JamesConfigMod.MOD_ID, "exampleconfig");
     public ExampleIndividualFileConfig() {
-        super("example/config", NAME);
+        super("example/config", NAME, StringWithContents::getName);
     }
 
     public static List<StringWithContents> STRINGS = new ArrayList<>();
@@ -23,11 +23,6 @@ public class ExampleIndividualFileConfig extends SimpleIndividualFileConfig<Stri
     @Override
     public List<StringWithContents> getObjects() {
         return STRINGS;
-    }
-
-    @Override
-    public String getFileName(StringWithContents object) {
-        return object.name;
     }
 
     @Override

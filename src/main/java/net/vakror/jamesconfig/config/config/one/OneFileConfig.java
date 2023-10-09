@@ -2,10 +2,8 @@ package net.vakror.jamesconfig.config.config.one;
 
 import com.google.gson.*;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.vakror.jamesconfig.JamesConfigMod;
@@ -79,10 +77,20 @@ public abstract class OneFileConfig<P> extends Config<P> {
             if (configFiles != null && configFiles.length != 0) {
                 File file = getConfigFile(getFileName().replaceAll(" ", "_").replaceAll("[^A-Za-z0-9_]", "").toLowerCase());
                 try (FileReader reader = new FileReader(file)) {
-                    JsonElement object = new JsonParser().parseReader(reader);
-                    this.addAll(codec.listOf().decode(JsonOps.INSTANCE, object).resultOrPartial((s) -> {
-                        throw new IllegalStateException(s);
-                    }).get().getFirst());
+                    JsonElement object = JsonParser.parseReader(reader);
+                    List<P> list = codec.listOf().decode(JsonOps.INSTANCE, object).resultOrPartial((s) -> {throw new IllegalStateException(s);}).get().getFirst();
+                    for (P value : list) {
+                        if (isValueAcceptable(value)) {
+                            this.add(value);
+                        } else {
+                            JamesConfigMod.LOGGER.warn("Unacceptable value of name \"{}\" found in config \"{}\", discarding value", getName(value),this.getName().toString());
+                            if (shouldDiscardConfigOnUnacceptableValue()) {
+                                this.invalidate();
+                            } else {
+                                this.discardValue(value);
+                            }
+                        }
+                    }
                 } catch (IOException e) {
                     System.out.println(e.getClass());
                     e.printStackTrace();
@@ -96,16 +104,13 @@ public abstract class OneFileConfig<P> extends Config<P> {
         } else {
             this.generateConfig();
             JamesConfigMod.LOGGER.info("Successfully Overwrote Config: " + this.getName());
+        } if (!this.isValid()) {
+            this.discardAllValues();
         }
     }
 
     @Override
     public abstract void add(P object);
-
-    @Override
-    public boolean isValid() {
-        return true;
-    }
 
     @Override
     public abstract Map<Type, Object> getTypeAdapters();
@@ -126,7 +131,6 @@ public abstract class OneFileConfig<P> extends Config<P> {
         }
         try {
             FileWriter writer = new FileWriter(getConfigFile(getFileName().replaceAll(" ", "_").replaceAll("[^A-Za-z0-9_]", "").toLowerCase()));
-            JsonObject object = new JsonObject();
             GSON.toJson(codec.listOf().encodeStart(JsonOps.INSTANCE, getObjects()).resultOrPartial(s -> {throw new IllegalStateException(s);}).get(), writer);
             writer.flush();
             writer.close();

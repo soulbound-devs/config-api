@@ -19,6 +19,16 @@ public abstract class Config<P> {
 
     public abstract String getSubPath();
 
+    public abstract boolean isValueAcceptable(P value);
+
+    public abstract boolean shouldDiscardConfigOnUnacceptableValue();
+
+    public abstract void invalidate();
+
+    public abstract void discardValue(P object);
+
+    public abstract void discardAllValues();
+
     public abstract ResourceLocation getName();
 
     @Override
@@ -29,6 +39,8 @@ public abstract class Config<P> {
     public abstract void readConfig(boolean overrideCurrent);
 
     public abstract void add(P object);
+
+    public abstract String getName(P object);
 
     public abstract boolean isValid();
     public abstract void addAll(List<P> object);

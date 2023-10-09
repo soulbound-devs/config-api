@@ -12,13 +12,13 @@ import java.util.List;
 public class ExampleOneFileConfig extends SimpleOneFileConfig<StringWithContents> {
     public static final ResourceLocation NAME = new ResourceLocation(JamesConfigMod.MOD_ID, "exampleonefileconfig");
     public ExampleOneFileConfig() {
-        super(StringWithContents.CODEC, "example/one_config", NAME);
+        super(StringWithContents.CODEC, "example/one_config", NAME, StringWithContents::getName);
     }
 
     public static final ExampleOneFileConfig INSTANCE = new ExampleOneFileConfig();
 
     @Expose
-    //MUST NOT BE STATIC
+    //MUST NOT BE STATIC IN A ONE FILE CONFIG
     //you can use a static instance field to access these configs from
     public List<StringWithContents> STRINGS = new ArrayList<>();
 

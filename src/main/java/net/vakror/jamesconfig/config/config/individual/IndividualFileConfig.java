@@ -21,7 +21,6 @@ import java.util.Map;
 public abstract class IndividualFileConfig<P> extends Config<P> {
     private Gson GSON;
 
-
     public void setGSON() {
         GsonBuilder builder = new GsonBuilder().enableComplexMapKeySerialization()
                 .registerTypeAdapter(CompoundTag.class, CompoundTagAdapter.INSTANCE);
@@ -73,7 +72,16 @@ public abstract class IndividualFileConfig<P> extends Config<P> {
                 for (File file : configFiles) {
                     try (FileReader reader = new FileReader(file)) {
                         P object = GSON.fromJson(reader, getConfigObjectClass());
-                        this.add(object);
+                        if (this.isValueAcceptable(object)) {
+                            this.add(object);
+                        } else {
+                            JamesConfigMod.LOGGER.warn("Unacceptable value of name \"{}\" found in config \"{}\", discarding value", getName(object),this.getName().toString());
+                            if (shouldDiscardConfigOnUnacceptableValue()) {
+                                this.invalidate();
+                            } else {
+                                this.discardValue(object);
+                            }
+                        }
                     } catch (IOException e) {
                         System.out.println(e.getClass());
                         e.printStackTrace();
@@ -89,14 +97,9 @@ public abstract class IndividualFileConfig<P> extends Config<P> {
             this.generateConfig();
             JamesConfigMod.LOGGER.info("Successfully Overwrote Config: " + this.getName());
         }
-    }
-
-    @Override
-    public abstract void add(P object);
-
-    @Override
-    public boolean isValid() {
-        return true;
+        if (!this.isValid()) {
+            this.discardAllValues();
+        }
     }
 
     @Override
@@ -104,8 +107,6 @@ public abstract class IndividualFileConfig<P> extends Config<P> {
 
     @Override
     public abstract List<P> getObjects();
-
-    public abstract String getFileName(P object);
 
     @Override
     protected abstract void resetToDefault();
@@ -120,7 +121,7 @@ public abstract class IndividualFileConfig<P> extends Config<P> {
         }
         for (P object : getObjects()) {
             try {
-                FileWriter writer = new FileWriter(getConfigFile(getFileName(object).replaceAll(" ", "_").replaceAll("[^A-Za-z0-9_]", "").toLowerCase()));
+                FileWriter writer = new FileWriter(getConfigFile(getName(object).replaceAll(" ", "_").replaceAll("[^A-Za-z0-9_]", "").toLowerCase()));
                 GSON.toJson(object, writer);
                 writer.flush();
                 writer.close();
