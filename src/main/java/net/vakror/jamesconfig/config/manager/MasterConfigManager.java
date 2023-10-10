@@ -1,5 +1,6 @@
 package net.vakror.jamesconfig.config.manager;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.vakror.jamesconfig.config.event.RegisterConfigManagersEvent;
 
@@ -12,7 +13,7 @@ public class MasterConfigManager {
 
     public static List<ConfigManager> getAllManagers() {
         RegisterConfigManagersEvent event = new RegisterConfigManagersEvent();
-        FMLJavaModLoadingContext.get().getModEventBus().post(event);
+        MinecraftForge.EVENT_BUS.post(event);
         return event.getManagers();
     }
 }

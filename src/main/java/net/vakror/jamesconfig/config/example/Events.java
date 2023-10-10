@@ -16,7 +16,7 @@ public class Events {
     public static class ForgeEvents {
         @SubscribeEvent
         public static void onGetConfigTypeAdapters(EntityJoinLevelEvent event) {
-            if (event.getEntity() instanceof Player player && !FMLEnvironment.production) {
+            if (event.getEntity() instanceof Player player) {
                 ExampleIndividualFileConfig.STRINGS.forEach((stringWithContents -> {
                     player.sendSystemMessage(Component.literal(stringWithContents.getName() + ":"));
                     player.sendSystemMessage(Component.literal("    " + stringWithContents.getContent()));

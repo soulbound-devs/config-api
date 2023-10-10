@@ -65,40 +65,47 @@ public abstract class IndividualFileConfig<P> extends Config<P> {
 
     @Override
     public void readConfig(boolean overrideCurrent) {
-        if (!overrideCurrent) {
-            JamesConfigMod.LOGGER.info("Reading configs: " + this.getName());
-            File[] configFiles = this.getConfigDir().listFiles(File::isFile);
-            if (configFiles != null && configFiles.length != 0) {
-                for (File file : configFiles) {
-                    try (FileReader reader = new FileReader(file)) {
-                        P object = GSON.fromJson(reader, getConfigObjectClass());
-                        if (this.isValueAcceptable(object)) {
-                            this.add(object);
-                        } else {
-                            JamesConfigMod.LOGGER.warn("Unacceptable value of name \"{}\" found in config \"{}\", discarding value", getName(object),this.getName().toString());
-                            if (shouldDiscardConfigOnUnacceptableValue()) {
-                                this.invalidate();
-                            } else {
-                                this.discardValue(object);
+        if (shouldReadConfig()) {
+            if (!overrideCurrent) {
+                JamesConfigMod.LOGGER.info("Reading configs: " + this.getName());
+                File[] configFiles = this.getConfigDir().listFiles(File::isFile);
+                if (configFiles != null && configFiles.length != 0) {
+                    for (File file : configFiles) {
+                        try (FileReader reader = new FileReader(file)) {
+                            P object = GSON.fromJson(reader, getConfigObjectClass());
+                            if (shouldAddObject(object)) {
+                                if (this.isValueAcceptable(object)) {
+                                    this.add(object);
+                                    this.onAddObject(object);
+                                } else {
+                                    if (shouldDiscardConfigOnUnacceptableValue()) {
+                                        JamesConfigMod.LOGGER.error("Discarding config because value {} is unacceptable", getName(object));
+                                        this.invalidate();
+                                    } else {
+                                        JamesConfigMod.LOGGER.error("Discarding unacceptable value {} in config {}", getName(object), getName());
+                                        this.discardValue(object);
+                                    }
+                                }
                             }
+                        } catch (IOException e) {
+                            System.out.println(e.getClass());
+                            e.printStackTrace();
+                            JamesConfigMod.LOGGER.warn("Error with config {}, generating new", this);
+                            this.generateConfig();
                         }
-                    } catch (IOException e) {
-                        System.out.println(e.getClass());
-                        e.printStackTrace();
-                        JamesConfigMod.LOGGER.warn("Error with config {}, generating new", this);
-                        this.generateConfig();
                     }
+                } else {
+                    this.generateConfig();
+                    JamesConfigMod.LOGGER.warn("Config " + this.getName() + "not found, generating new");
                 }
             } else {
                 this.generateConfig();
-                JamesConfigMod.LOGGER.warn("Config " + this.getName() + "not found, generating new");
+                JamesConfigMod.LOGGER.info("Successfully Overwrote Config: " + this.getName());
             }
-        } else {
-            this.generateConfig();
-            JamesConfigMod.LOGGER.info("Successfully Overwrote Config: " + this.getName());
-        }
-        if (!this.isValid()) {
-            this.discardAllValues();
+            if (!this.isValid()) {
+                JamesConfigMod.LOGGER.error("Config {} was found to be invalid, discarding all values", this.getName());
+                this.discardAllValues();
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package net.vakror.jamesconfig;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -17,6 +18,7 @@ import net.vakror.jamesconfig.config.Events;
 import net.vakror.jamesconfig.config.event.ConfigRegisterEvent;
 import net.vakror.jamesconfig.config.example.ExampleConfigs;
 import net.vakror.jamesconfig.config.manager.MasterConfigManager;
+import net.vakror.jamesconfig.config.packet.ModPackets;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -31,6 +33,7 @@ public class JamesConfigMod
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final Map<ResourceLocation, Config<?>> CONFIGS = new HashMap<>();
+    public static final Map<ResourceLocation, Codec<? extends Config<?>>> CODECS = new HashMap<ResourceLocation, com.mojang.serialization.Codec<? extends Config<?>>>();
     // Create a Deferred Register to hold Blocks which will all be registered under the "examplemod" namespace
     public JamesConfigMod()
     {
@@ -38,7 +41,10 @@ public class JamesConfigMod
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(EventPriority.LOWEST, this::commonSetup);
-        modEventBus.addListener(Events.ModEvents::registerSimpleManager);
+        MinecraftForge.EVENT_BUS.addListener(Events.ModEvents::registerSimpleManager);
+
+        MinecraftForge.EVENT_BUS.addListener(ModPackets::onLogIn);
+        MinecraftForge.EVENT_BUS.addListener(net.vakror.jamesconfig.config.example.Events.ForgeEvents::onGetConfigTypeAdapters);
 
         //Call this in mod constructor or anywhere before commonsetup fires
         ExampleConfigs.addExampleConfig();
@@ -60,11 +66,17 @@ public class JamesConfigMod
         CONFIGS.put(name, register);
     }
 
+    public static void addCodec(ResourceLocation name, Config<?> register) {
+        CODECS.put(name, register.getCodec());
+    }
+
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            ModPackets.register();
             ConfigRegisterEvent event1 = new ConfigRegisterEvent();
-            FMLJavaModLoadingContext.get().getModEventBus().post(event1);
+            MinecraftForge.EVENT_BUS.post(event1);
             event1.getConfigs().forEach((JamesConfigMod::addConfig));
+            event1.getConfigs().forEach((JamesConfigMod::addCodec));
             registerAllConfigs(false);
         });
     }
@@ -75,7 +87,7 @@ public class JamesConfigMod
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-    @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT)
     public static class ClientModEvents
     {
         @SubscribeEvent

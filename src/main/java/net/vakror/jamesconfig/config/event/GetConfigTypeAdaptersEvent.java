@@ -3,7 +3,6 @@ package net.vakror.jamesconfig.config.event;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.event.IModBusEvent;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -11,7 +10,7 @@ import java.util.Map;
 
 
 @Cancelable
-public class GetConfigTypeAdaptersEvent extends Event implements IModBusEvent {
+public class GetConfigTypeAdaptersEvent extends Event {
     private final Map<Type, Object> adapters = new HashMap<>();
     private final ResourceLocation configName;
 

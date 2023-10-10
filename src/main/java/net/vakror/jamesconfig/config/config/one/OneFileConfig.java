@@ -21,7 +21,7 @@ import java.util.Map;
 
 public abstract class OneFileConfig<P> extends Config<P> {
     private Gson GSON;
-    private final Codec<P> codec;
+    public final Codec<P> codec;
 
     public OneFileConfig(Codec<P> codec) {
         this.codec = codec;
@@ -71,41 +71,51 @@ public abstract class OneFileConfig<P> extends Config<P> {
 
     @Override
     public void readConfig(boolean overrideCurrent) {
-        if (!overrideCurrent) {
-            JamesConfigMod.LOGGER.info("Reading configs: " + this.getName());
-            File[] configFiles = this.getConfigDir().listFiles(File::isFile);
-            if (configFiles != null && configFiles.length != 0) {
-                File file = getConfigFile(getFileName().replaceAll(" ", "_").replaceAll("[^A-Za-z0-9_]", "").toLowerCase());
-                try (FileReader reader = new FileReader(file)) {
-                    JsonElement object = JsonParser.parseReader(reader);
-                    List<P> list = codec.listOf().decode(JsonOps.INSTANCE, object).resultOrPartial((s) -> {throw new IllegalStateException(s);}).get().getFirst();
-                    for (P value : list) {
-                        if (isValueAcceptable(value)) {
-                            this.add(value);
-                        } else {
-                            JamesConfigMod.LOGGER.warn("Unacceptable value of name \"{}\" found in config \"{}\", discarding value", getName(value),this.getName().toString());
-                            if (shouldDiscardConfigOnUnacceptableValue()) {
-                                this.invalidate();
-                            } else {
-                                this.discardValue(value);
+        if (shouldReadConfig()) {
+            if (!overrideCurrent) {
+                JamesConfigMod.LOGGER.info("Reading configs: " + this.getName());
+                File[] configFiles = this.getConfigDir().listFiles(File::isFile);
+                if (configFiles != null && configFiles.length != 0) {
+                    File file = getConfigFile(getFileName().replaceAll(" ", "_").replaceAll("[^A-Za-z0-9_]", "").toLowerCase());
+                    try (FileReader reader = new FileReader(file)) {
+                        JsonElement element = JsonParser.parseReader(reader);
+                        List<P> list = codec.listOf().decode(JsonOps.INSTANCE, element).resultOrPartial((s) -> {
+                            throw new IllegalStateException(s);
+                        }).get().getFirst();
+                        for (P object : list) {
+                            if (shouldAddObject(object)) {
+                                if (isValueAcceptable(object)) {
+                                    this.add(object);
+                                    this.onAddObject(object);
+                                } else {
+                                    if (shouldDiscardConfigOnUnacceptableValue()) {
+                                        JamesConfigMod.LOGGER.error("Discarding config because value {} is unacceptable", getName(object));
+                                        this.invalidate();
+                                    } else {
+                                        JamesConfigMod.LOGGER.error("Discarding unacceptable value {} in config {}", getName(object), getName());
+                                        this.discardValue(object);
+                                    }
+                                }
                             }
                         }
+                    } catch (IOException e) {
+                        System.out.println(e.getClass());
+                        e.printStackTrace();
+                        JamesConfigMod.LOGGER.warn("Error with config {}, generating new", this);
+                        this.generateConfig();
                     }
-                } catch (IOException e) {
-                    System.out.println(e.getClass());
-                    e.printStackTrace();
-                    JamesConfigMod.LOGGER.warn("Error with config {}, generating new", this);
+                } else {
                     this.generateConfig();
+                    JamesConfigMod.LOGGER.warn("Config " + this.getName() + "not found, generating new");
                 }
             } else {
                 this.generateConfig();
-                JamesConfigMod.LOGGER.warn("Config " + this.getName() + "not found, generating new");
+                JamesConfigMod.LOGGER.info("Successfully Overwrote Config: " + this.getName());
             }
-        } else {
-            this.generateConfig();
-            JamesConfigMod.LOGGER.info("Successfully Overwrote Config: " + this.getName());
-        } if (!this.isValid()) {
-            this.discardAllValues();
+            if (!this.isValid()) {
+                JamesConfigMod.LOGGER.error("Config {} was found to be invalid, discarding all values", this.getName());
+                this.discardAllValues();
+            }
         }
     }
 

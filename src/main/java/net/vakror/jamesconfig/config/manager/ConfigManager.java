@@ -2,6 +2,7 @@ package net.vakror.jamesconfig.config.manager;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -17,12 +18,12 @@ import java.util.Map;
 public abstract class ConfigManager {
 
     public void register() {
-        FMLJavaModLoadingContext.get().getModEventBus().register(new ModEvents(this));
+        MinecraftForge.EVENT_BUS.register(new ModEvents(this));
     }
 
     public abstract Map<Config<?>, List<Pair<Type, Object>>> getAllConfigs();
 
-    @Mod.EventBusSubscriber(modid = JamesConfigMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    @Mod.EventBusSubscriber(modid = JamesConfigMod.MOD_ID)
     public static class ModEvents {
         private final ConfigManager manager;
         private ModEvents(ConfigManager manager) {

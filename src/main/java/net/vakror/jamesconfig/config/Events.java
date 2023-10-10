@@ -8,7 +8,7 @@ import net.vakror.jamesconfig.config.manager.NoAdapterConfigManager;
 import net.vakror.jamesconfig.config.manager.SimpleConfigManager;
 
 public class Events {
-    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = JamesConfigMod.MOD_ID)
+    @Mod.EventBusSubscriber(modid = JamesConfigMod.MOD_ID)
     public static class ModEvents {
         @SubscribeEvent
         public static void registerSimpleManager(RegisterConfigManagersEvent event) {

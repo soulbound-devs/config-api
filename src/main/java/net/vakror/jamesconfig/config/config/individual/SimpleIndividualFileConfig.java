@@ -1,8 +1,12 @@
 package net.vakror.jamesconfig.config.config.individual;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.vakror.jamesconfig.config.event.GetConfigTypeAdaptersEvent;
+import net.vakror.jamesconfig.config.example.configs.StringWithContents;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -15,7 +19,7 @@ public abstract class SimpleIndividualFileConfig<P> extends IndividualFileConfig
     private final String subPath;
     private final ResourceLocation name;
     private final Function<P, String> nameGetter;
-    private boolean valid;
+    private boolean valid = true;
 
 
     public SimpleIndividualFileConfig(String subPath, ResourceLocation name, Function<P, String> nameGetter) {
@@ -46,6 +50,11 @@ public abstract class SimpleIndividualFileConfig<P> extends IndividualFileConfig
     }
 
     @Override
+    public boolean shouldClearBeforeSync() {
+        return true;
+    }
+
+    @Override
     public void discardAllValues() {
         getObjects().clear();
     }
@@ -53,6 +62,20 @@ public abstract class SimpleIndividualFileConfig<P> extends IndividualFileConfig
     @Override
     public void discardValue(P object) {
         getObjects().remove(object);
+    }
+
+    @Override
+    public boolean shouldReadConfig() {
+        return true;
+    }
+
+    @Override
+    public boolean shouldAddObject(P object) {
+        return true;
+    }
+
+    @Override
+    public void onAddObject(P object) {
     }
 
     @Override
@@ -85,9 +108,14 @@ public abstract class SimpleIndividualFileConfig<P> extends IndividualFileConfig
     }
 
     @Override
+    public boolean shouldSync() {
+        return true;
+    }
+
+    @Override
     public Map<Type, Object> getTypeAdapters() {
         GetConfigTypeAdaptersEvent event = new GetConfigTypeAdaptersEvent(name);
-        boolean cancelled = FMLJavaModLoadingContext.get().getModEventBus().post(event);
+        boolean cancelled = MinecraftForge.EVENT_BUS.post(event);
         return cancelled ? new HashMap<>(): event.getAdapters();
     }
 }

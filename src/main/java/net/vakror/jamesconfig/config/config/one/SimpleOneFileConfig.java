@@ -1,7 +1,10 @@
 package net.vakror.jamesconfig.config.config.one;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.vakror.jamesconfig.config.event.GetConfigTypeAdaptersEvent;
 
@@ -16,7 +19,7 @@ public abstract class SimpleOneFileConfig<P> extends OneFileConfig<P> {
     private final String subPath;
     private final ResourceLocation name;
     private final Function<P, String> nameGetter;
-    private boolean valid;
+    private boolean valid = true;
 
     public SimpleOneFileConfig(Codec<P> codec, String subPath, ResourceLocation name, Function<P, String> nameGetter) {
         super(codec);
@@ -62,6 +65,25 @@ public abstract class SimpleOneFileConfig<P> extends OneFileConfig<P> {
     }
 
     @Override
+    public boolean shouldClearBeforeSync() {
+        return true;
+    }
+
+    @Override
+    public boolean shouldReadConfig() {
+        return true;
+    }
+
+    @Override
+    public boolean shouldAddObject(P object) {
+        return true;
+    }
+
+    @Override
+    public void onAddObject(P object) {
+    }
+
+    @Override
     public void discardAllValues() {
         getObjects().clear();
     }
@@ -73,6 +95,11 @@ public abstract class SimpleOneFileConfig<P> extends OneFileConfig<P> {
 
     @Override
     protected void resetToDefault() {
+    }
+
+    @Override
+    public boolean shouldSync() {
+        return true;
     }
 
     @Override
@@ -88,8 +115,7 @@ public abstract class SimpleOneFileConfig<P> extends OneFileConfig<P> {
     @Override
     public Map<Type, Object> getTypeAdapters() {
         GetConfigTypeAdaptersEvent event = new GetConfigTypeAdaptersEvent(name);
-        boolean cancelled = FMLJavaModLoadingContext.get().getModEventBus().post(event);
-        return cancelled ? new HashMap<>(): event.getAdapters();
+        boolean cancelled = MinecraftForge.EVENT_BUS.post(event);
+        return cancelled ? new HashMap<>() : event.getAdapters();
     }
 }
-

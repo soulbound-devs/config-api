@@ -1,7 +1,13 @@
 package net.vakror.jamesconfig.config.example.configs;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
+import net.vakror.jamesconfig.config.config.Config;
 import net.vakror.jamesconfig.config.config.individual.SimpleIndividualFileConfig;
 
 import java.util.ArrayList;
@@ -12,12 +18,25 @@ public class ExampleIndividualFileConfig extends SimpleIndividualFileConfig<Stri
     public ExampleIndividualFileConfig() {
         super("example/config", NAME, StringWithContents::getName);
     }
+    public ExampleIndividualFileConfig(List<StringWithContents> contents) {
+        super("example/config", NAME, StringWithContents::getName);
+        STRINGS = contents;
+    }
 
     public static List<StringWithContents> STRINGS = new ArrayList<>();
 
     @Override
     public void addAll(List<StringWithContents> object) {
         STRINGS.addAll(object);
+    }
+
+    public static final Codec<ExampleIndividualFileConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            StringWithContents.CODEC.listOf().fieldOf("objects").forGetter(ExampleIndividualFileConfig::getObjects)
+    ).apply(instance, ExampleIndividualFileConfig::new));
+
+    @Override
+    public Codec<? extends Config<StringWithContents>> getCodec() {
+        return CODEC;
     }
 
     @Override

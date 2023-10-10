@@ -1,5 +1,6 @@
 package net.vakror.jamesconfig.config.config;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,7 +44,16 @@ public abstract class Config<P> {
     public abstract String getName(P object);
 
     public abstract boolean isValid();
+
     public abstract void addAll(List<P> object);
+
+    public abstract Codec<? extends Config<P>> getCodec();
+
+    public abstract boolean shouldReadConfig();
+
+    public abstract boolean shouldAddObject(P object);
+
+    public abstract void onAddObject(P object);
 
     public abstract Map<Type, Object> getTypeAdapters();
 
@@ -52,4 +62,16 @@ public abstract class Config<P> {
     protected abstract void resetToDefault();
 
     public abstract void writeConfig();
+
+    /**
+     *
+     * @return whether to clear this config before it is synced. Recommended for all non-clientside configs
+     */
+    public abstract boolean shouldClearBeforeSync();
+
+    /**
+     * will not do anything if config is clientside
+     * @return whether to sync
+     */
+    public abstract boolean shouldSync();
 }
