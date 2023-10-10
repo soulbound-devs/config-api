@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "jamesconfig",
+  "version": "${version}",
+
+  "name": "James Config",
+  "description": "",
+  "authors": [],
+  "contact": {},
+
+  "license": "All Rights Reserved",
+  "icon": "icon.png",
+
+  "environment": "*",
+  "entrypoints": {},
+  "mixins": [
+    "jamesconfig.mixins.json",
+    "jamesconfig-common.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.23",
+    "minecraft": ">=1.19.2"
+  }
+}
