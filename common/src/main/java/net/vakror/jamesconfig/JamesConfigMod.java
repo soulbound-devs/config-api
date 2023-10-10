@@ -26,13 +26,13 @@ public class JamesConfigMod
 	public static final String MOD_ID = "jamesconfig";
 
 	public static void init() {
-		
+		new JamesConfigMod();
 	}
 	// Directly reference a slf4j logger
 	public static final Logger LOGGER = LogUtils.getLogger();
 	public static final Map<ResourceLocation, Config<?>> CONFIGS = new HashMap<>();
 	public static final Map<ResourceLocation, Codec<? extends Config<?>>> CODECS = new HashMap<ResourceLocation, com.mojang.serialization.Codec<? extends Config<?>>>();
-	// Create a Deferred Register to hold Blocks which will all be registered under the "examplemod" namespace
+
 	public JamesConfigMod()
 	{
 		ConfigEvents.REGISTER_CONFIG_MANAGERS.register(event -> {
