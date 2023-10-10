@@ -31,7 +31,7 @@ public class JamesConfigMod
 	// Directly reference a slf4j logger
 	public static final Logger LOGGER = LogUtils.getLogger();
 	public static final Map<ResourceLocation, Config<?>> CONFIGS = new HashMap<>();
-	public static final Map<ResourceLocation, Codec<? extends Config<?>>> CODECS = new HashMap<ResourceLocation, com.mojang.serialization.Codec<? extends Config<?>>>();
+	public static final Map<ResourceLocation, Codec<? extends Config<?>>> CODECS = new HashMap<>();
 
 	public JamesConfigMod()
 	{
