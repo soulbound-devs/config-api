@@ -1,3 +1,4 @@
 before_install:
-  - sdk install java 17.0.4-open
-  - sdk use java 17.0.4-open
+  - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+  - source install-jdk.sh --feature 17
+  - jshell --version
