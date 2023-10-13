@@ -8,7 +8,9 @@ import net.vakror.jamesconfig.config.config.object.default_objects.primitive.Boo
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.StringPrimitiveObject;
 import net.vakror.jamesconfig.config.config.object.default_objects.setting.SimpleSettingConfigObject;
 import net.vakror.jamesconfig.config.config.setting.SimpleSettingConfigImpl;
-import java.util.HashMap;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ExampleSettingConfig extends SimpleSettingConfigImpl {
@@ -17,33 +19,29 @@ public class ExampleSettingConfig extends SimpleSettingConfigImpl {
     }
 
     @Override
-    public Map<String, ConfigObject> getRequiredSettings() {
-        Map<String, ConfigObject> map = new HashMap<>();
-        map.put("this is a setting config", new TestSettingObject());
-        map.put("doesThisWork", new BooleanPrimitiveObject(false));
-        return map;
+    public List<ConfigObject> getRequiredSettings() {
+        List<ConfigObject> list = new ArrayList<>();
+        TestSettingObject object = new TestSettingObject("this is a setting config");
+        object.setValue("all the files in this directory will not be loaded", new StringPrimitiveObject("into the config, only this one will with exactly these options"));
+        list.add(object);
+        list.add(new BooleanPrimitiveObject(true, "doesThisWork"));
+        return list;
     }
 
     public static class TestSettingObject extends SimpleSettingConfigObject {
 
+        public TestSettingObject(String name) {
+            super(name);
+        }
+
         @Override
-        public Map<String, ConfigObject> getRequiredSettings() {
-            return Map.of("all the files in this directory will not be loaded", new StringPrimitiveObject(""));
+        public List<ConfigObject> getRequiredSettings() {
+            return List.of(new StringPrimitiveObject("", "all the files in this directory will not be loaded"));
         }
 
         @Override
         public SettingConfigObject newDefinition(String name)  {
-            return new TestSettingObject();
+            return new TestSettingObject(null);
         }
-    }
-
-    @Override
-    public Map<String, ConfigObject> getDefaultValues() {
-        Map<String, ConfigObject> map = new HashMap<>();
-        TestSettingObject object = new TestSettingObject();
-        object.setValue("all the files in this directory will not be loaded", new StringPrimitiveObject("into the config, only this one will with exactly these options"));
-        map.put("this is a setting config", object);
-        map.put("doesThisWork", new BooleanPrimitiveObject(true));
-        return map;
     }
 }

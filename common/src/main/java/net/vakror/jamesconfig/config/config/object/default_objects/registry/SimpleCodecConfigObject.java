@@ -30,7 +30,7 @@ public abstract class SimpleCodecConfigObject<P> extends ConfigObject {
     }
 
     @Override
-    public ConfigObject deserialize(String name, JsonElement element) {
+    public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue) {
         Either<Pair<P, JsonElement>, DataResult.PartialResult<Pair<P, JsonElement>>> optional = getCodec().decode(JsonOps.INSTANCE, element).get();
 
 

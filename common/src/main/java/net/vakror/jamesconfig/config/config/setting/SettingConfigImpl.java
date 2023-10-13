@@ -17,15 +17,19 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public abstract class SettingConfigImpl extends Config {
 
+    public Map<String, ConfigObject> requiredSettingsMap = new HashMap<>();
+
     @Override
     public void generateConfig() {
         this.clear();
-        this.getDefaultValues().forEach(this::setValue);
+        setRequiredSettingsMap();
+        this.requiredSettingsMap.forEach(this::setValue);
         this.writeConfig();
     }
 
@@ -35,6 +39,14 @@ public abstract class SettingConfigImpl extends Config {
         File configDir;
         configDir = Platform.getConfigFolder().resolve(getSubPath()).toFile();
         return configDir;
+    }
+
+    public final void setRequiredSettingsMap() {
+        if (requiredSettingsMap.isEmpty()) {
+            for (ConfigObject defaultValue : getRequiredSettings()) {
+                requiredSettingsMap.put(defaultValue.getName(), defaultValue);
+            }
+        }
     }
 
     @NotNull
@@ -56,11 +68,9 @@ public abstract class SettingConfigImpl extends Config {
     }
 
     /**
-     * contents of config object do not matter
+     * contents of config object will be used as defaults
      */
-    public abstract Map<String, ConfigObject> getRequiredSettings();
-
-    public abstract Map<String, ConfigObject> getDefaultValues();
+    public abstract List<ConfigObject> getRequiredSettings();
 
     public abstract String getFileName();
 
@@ -76,9 +86,15 @@ public abstract class SettingConfigImpl extends Config {
                         try (FileReader reader = new FileReader(file)) {
                             JsonObject jsonObject = (JsonObject) JsonParser.parseReader(reader);
                             List<ConfigObject> configObjects = parse(jsonObject);
+                            Stopwatch stopwatch1 = Stopwatch.createStarted();
+                            JamesConfigMod.LOGGER.info("Setting values in config {} to parsed value", this);
                             for (ConfigObject object : configObjects) {
+                                Stopwatch stopwatch2 = Stopwatch.createStarted();
+                                JamesConfigMod.LOGGER.info("Setting value {} to parsed value in setting config {}", object.getName(), this);
                                 setValue(object.getName(), object);
+                                JamesConfigMod.LOGGER.info("Finished setting value {} to parsed value, \033[0;31mTook {}\033[0;0m", object.getName(), stopwatch2);
                             }
+                            JamesConfigMod.LOGGER.info("Finished setting values in config {} to parsed value, \033[0;31mTook {}\033[0;0m", this, stopwatch1);
                         } catch (IOException e) {
                             System.out.println(e.getClass());
                             e.printStackTrace();
@@ -102,25 +118,31 @@ public abstract class SettingConfigImpl extends Config {
 
     @Override
     public List<ConfigObject> parse(JsonObject jsonObject) {
+        setRequiredSettingsMap();
         Stopwatch stopwatch = Stopwatch.createStarted();
         JamesConfigMod.LOGGER.info("Parsing config: " + this.getName());
         List<ConfigObject> list = new ArrayList<>();
         for (String key : jsonObject.keySet()) {
-            if (!getRequiredSettings().containsKey(key)) {
+            if (!requiredSettingsMap.containsKey(key)) {
                 JamesConfigMod.LOGGER.error("Key {} present in config {}, even though it was not requested", key, getFileName());
             } else {
-                ConfigObject object = getRequiredSettings().get(key);
-                if (object instanceof SettingConfigObject settingConfigObject) {
-                    if (!jsonObject.get(key).isJsonObject()) {
-                        JamesConfigMod.LOGGER.error("Config setting definition {} in config {} is not json object", key, getName());
+                ConfigObject object = requiredSettingsMap.get(key);
+                try {
+                    if (object instanceof SettingConfigObject settingConfigObject) {
+                        if (!jsonObject.get(key).isJsonObject()) {
+                            JamesConfigMod.LOGGER.error("Config setting definition {} in config {} is not json object", key, getName());
+                        }
+                        ConfigObject object1 = settingConfigObject.deserializeSettingValues(key, (JsonObject) jsonObject.get(key), getName().toString());
+                        object1.setName(key);
+                        list.add(object1);
+                    } else if (object != null) {
+                        ConfigObject object1 = object.deserialize(key, jsonObject.get(key), this.requiredSettingsMap.get(key));
+                        object1.setName(key);
+                        list.add(object1);
                     }
-                    ConfigObject object1 = settingConfigObject.deserializeSettingValues(key, (JsonObject) jsonObject.get(key), getName().toString());
-                    object1.setName(key);
-                    list.add(object1);
-                } else if (object != null) {
-                    ConfigObject object1 = object.deserialize(key, jsonObject.get(key));
-                    object1.setName(key);
-                    list.add(object1);
+                } catch (Exception e) {
+                    JamesConfigMod.LOGGER.error("Error reading config object {}, skipping. Make sure it is the right type.", key);
+                    e.printStackTrace();
                 }
             }
         }

@@ -50,7 +50,7 @@ public class StringWithContents extends ConfigObject {
     }
 
     @Override
-    public ConfigObject deserialize(String name, JsonElement element) {
+    public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue) {
         return CODEC.decode(JsonOps.INSTANCE, element).getOrThrow(false, (s) -> {throw new IllegalStateException(s);}).getFirst();
     }
 

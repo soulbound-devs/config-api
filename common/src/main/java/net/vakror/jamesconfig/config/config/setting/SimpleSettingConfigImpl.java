@@ -9,13 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static net.vakror.jamesconfig.config.config.object.default_objects.setting.SimpleSettingConfigObject.getRequiredSettingsAsString;
+
 public abstract class SimpleSettingConfigImpl extends SettingConfigImpl {
 
     private final String subPath;
     private final ResourceLocation name;
     private final String fileName;
 
-    public final Map<String, ConfigObject> values = new HashMap<>();
+    public final Map<String, ConfigObject> values = new HashMap<>(getRequiredSettings().size());
 
     public SimpleSettingConfigImpl(String subPath, ResourceLocation name, String fileName) {
         this.subPath = subPath;
@@ -30,11 +32,16 @@ public abstract class SimpleSettingConfigImpl extends SettingConfigImpl {
 
     @Override
     public void setValue(String name, ConfigObject value) {
-        if (!getRequiredSettings().containsKey(name)) {
-            JamesConfigMod.LOGGER.error("Attempted to add setting \"{}\" which is not found in required values, not adding value", name);
+        if (name == null) name = value.getName();
+        if (!requiredSettingsMap.containsKey(name)) {
+            JamesConfigMod.LOGGER.error("Attempted to add setting \"{}\" which is not found in required values, not adding value. Required values are: {}", name, allRequiredKeys());
         } else {
             values.put(name, value);
         }
+    }
+
+    private String allRequiredKeys() {
+        return getRequiredSettingsAsString(requiredSettingsMap);
     }
 
     @Override

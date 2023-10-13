@@ -36,7 +36,7 @@ public class CompoundRegistryObject extends RegistryConfigObject {
     }
 
     @Override
-    public ConfigObject deserialize(String name, JsonElement element) {
+    public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue) {
         JsonObject object = (JsonObject) element;
         CompoundRegistryObject compoundObject = new CompoundRegistryObject(name);
 

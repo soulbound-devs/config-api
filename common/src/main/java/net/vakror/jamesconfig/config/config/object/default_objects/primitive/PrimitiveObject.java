@@ -1,11 +1,11 @@
 package net.vakror.jamesconfig.config.config.object.default_objects.primitive;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
-import net.vakror.jamesconfig.config.config.object.default_objects.registry.SimpleCodecConfigObject;
 
-public abstract class PrimitiveObject<P> extends SimpleCodecConfigObject<P> {
+public abstract class PrimitiveObject<P> extends ConfigObject {
     protected final P content;
     protected String name;
 
@@ -20,9 +20,28 @@ public abstract class PrimitiveObject<P> extends SimpleCodecConfigObject<P> {
     }
 
     @Override
-    public ConfigObject deserialize(String name, JsonElement element) {
+    public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue) {
         this.name = name;
-        return super.deserialize(name, element);
+        ConfigObject object = ConfigObject.deserializePrimitive(name, (JsonPrimitive) element);
+        if (object == null || !object.getClass().equals(this.getClass())) {
+            return defaultValue;
+        }
+        return object;
+    }
+
+    @Override
+    public JsonElement serialize() {
+        JsonElement element = null;
+        if (getValue() instanceof Number number) {
+             element = new JsonPrimitive(number);
+        }
+        if (getValue() instanceof Boolean bool) {
+            element = new JsonPrimitive(bool);
+        }
+        if (getValue() instanceof String string) {
+            element = new JsonPrimitive(string);
+        }
+        return element;
     }
 
     @Override
@@ -40,7 +59,6 @@ public abstract class PrimitiveObject<P> extends SimpleCodecConfigObject<P> {
         return null;
     }
 
-    @Override
     public P getValue() {
         return content;
     }

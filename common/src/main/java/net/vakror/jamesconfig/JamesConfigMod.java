@@ -1,5 +1,6 @@
 package net.vakror.jamesconfig;
 
+import com.google.common.base.Stopwatch;
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
@@ -62,7 +63,10 @@ public class JamesConfigMod
 	}
 
 	public static void registerAllConfigs(boolean replace) {
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		LOGGER.info("Reading All Configs");
 		CONFIGS.forEach((name, register) -> register.readConfig(replace));
+		LOGGER.info("Finished reading all configs, \033[0;31mTook {}\033[0;0m", stopwatch);
 	}
 
 	public static void addConfig(ResourceLocation name, Config register) {

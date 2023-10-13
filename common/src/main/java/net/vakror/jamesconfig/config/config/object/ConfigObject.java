@@ -3,11 +3,12 @@ package net.vakror.jamesconfig.config.config.object;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.LazilyParsedNumber;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.BooleanPrimitiveObject;
+import net.vakror.jamesconfig.config.config.object.default_objects.primitive.NumberPrimitiveObject;
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.StringPrimitiveObject;
-import net.vakror.jamesconfig.config.config.object.default_objects.primitive.number.*;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class ConfigObject {
@@ -18,7 +19,7 @@ public abstract class ConfigObject {
     public abstract void setName(String name);
     public abstract ResourceLocation getType();
     public abstract JsonElement serialize();
-    public abstract ConfigObject deserialize(@Nullable String name, JsonElement element);
+    public abstract ConfigObject deserialize(@Nullable String name, JsonElement element, ConfigObject defaultValue);
 
     @Nullable
     public static ConfigObject deserializeUnknown(JsonElement element) {
@@ -42,27 +43,10 @@ public abstract class ConfigObject {
         }
     }
 
-    private static ConfigObject deserializePrimitive(String name, JsonPrimitive element) {
+    public static ConfigObject deserializePrimitive(String name, JsonPrimitive element) {
         if (element.isNumber()) {
             Number number = element.getAsNumber();
-            if (number instanceof Byte bytee) {
-                return new BytePrimitiveObject(bytee, name);
-            }
-            if (number instanceof Double doublee) {
-                return new DoublePrimitiveObject(doublee, name);
-            }
-            if (number instanceof Float floatt) {
-                return new FloatPrimitiveObject(floatt, name);
-            }
-            if (number instanceof Integer intt) {
-                return new IntegerPrimitiveObject(intt, name);
-            }
-            if (number instanceof Long longg) {
-                return new LongPrimitiveObject(longg, name);
-            }
-            if (number instanceof Short shortt) {
-                return new ShortPrimitiveObject(shortt, name);
-            }
+            return new NumberPrimitiveObject(number, name);
         } else if (element.isString()) {
             return new StringPrimitiveObject(element.getAsString(), name);
         } else if (element.isBoolean()) {
@@ -77,6 +61,6 @@ public abstract class ConfigObject {
             JamesConfigMod.LOGGER.error("Could not find config object object of type {}", jsonObject.getAsJsonPrimitive("type").getAsString());
             return null;
         }
-        return object.deserialize(name, jsonObject);
+        return object.deserialize(name, jsonObject, null);
     }
 }
