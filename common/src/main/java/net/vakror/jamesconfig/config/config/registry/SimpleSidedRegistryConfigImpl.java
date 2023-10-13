@@ -1,4 +1,4 @@
-package net.vakror.jamesconfig.config.config.individual;
+package net.vakror.jamesconfig.config.config.registry;
 
 import dev.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
@@ -6,10 +6,10 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Function;
 
-public abstract class SimpleSidedIndividualFileConfig<P> extends SimpleIndividualFileConfig<P> {
+public abstract class SimpleSidedRegistryConfigImpl extends SimpleRegistryConfigImpl {
     private final EnvType side;
-    public SimpleSidedIndividualFileConfig(EnvType side, String subPath, ResourceLocation name, Function<P, String> nameGetter) {
-        super(subPath, name, nameGetter);
+    public SimpleSidedRegistryConfigImpl(EnvType side, String subPath, ResourceLocation name) {
+        super(subPath, name);
         this.side = side;
     }
 

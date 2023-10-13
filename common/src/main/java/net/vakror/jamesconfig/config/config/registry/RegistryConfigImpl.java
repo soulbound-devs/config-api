@@ -1,34 +1,29 @@
-package net.vakror.jamesconfig.config.config.individual;
+package net.vakror.jamesconfig.config.config.registry;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonWriter;
 import dev.architectury.platform.Platform;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
-import net.vakror.jamesconfig.config.adapter.CompoundTagAdapter;
 import net.vakror.jamesconfig.config.config.Config;
+import net.vakror.jamesconfig.config.config.object.ConfigObject;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public abstract class IndividualFileConfig<P> extends Config<P> {
-    private Gson GSON;
+public abstract class RegistryConfigImpl extends Config {
 
-    public void setGSON() {
-        GsonBuilder builder = new GsonBuilder().enableComplexMapKeySerialization()
-                .registerTypeAdapter(CompoundTag.class, CompoundTagAdapter.INSTANCE);
-
-        getTypeAdapters().forEach(builder::registerTypeAdapter);
-
-        GSON = builder.setPrettyPrinting().create();
-    }
+    public List<ConfigObject> objects = new ArrayList<>();
 
     @Override
     public void generateConfig() {
@@ -72,18 +67,25 @@ public abstract class IndividualFileConfig<P> extends Config<P> {
                 if (configFiles != null && configFiles.length != 0) {
                     for (File file : configFiles) {
                         try (FileReader reader = new FileReader(file)) {
-                            P object = GSON.fromJson(reader, getConfigObjectClass());
-                            if (shouldAddObject(object)) {
-                                if (this.isValueAcceptable(object)) {
-                                    this.add(object);
-                                    this.onAddObject(object);
-                                } else {
-                                    if (shouldDiscardConfigOnUnacceptableValue()) {
-                                        JamesConfigMod.LOGGER.error("Discarding config because value {} is unacceptable", getName(object));
-                                        this.invalidate();
-                                    } else {
-                                        JamesConfigMod.LOGGER.error("Discarding unacceptable value {} in config {}", getName(object), getName());
-                                        this.discardValue(object);
+                            JsonObject jsonObject = (JsonObject) JsonParser.parseReader(reader);
+                            if (!jsonObject.has("type") || !jsonObject.get("type").isJsonPrimitive() || !jsonObject.getAsJsonPrimitive("type").isString()) {
+                                JamesConfigMod.LOGGER.error("Config object {} either does not contain a type field, or the type field is not a string", file.getName());
+                            } else {
+                                ConfigObject object = ConfigObject.deserializeUnknown(jsonObject);
+                                if (object != null) {
+                                    if (shouldAddObject(object)) {
+                                        if (this.isValueAcceptable(object)) {
+                                            this.add(object);
+                                            this.onAddObject(object);
+                                        } else {
+                                            if (shouldDiscardConfigOnUnacceptableValue()) {
+                                                JamesConfigMod.LOGGER.error("Discarding config because value {} is unacceptable", object.getName());
+                                                this.invalidate();
+                                            } else {
+                                                JamesConfigMod.LOGGER.error("Discarding unacceptable value {} in config {}", object.getName(), getName());
+                                                this.discardValue(object);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -110,15 +112,16 @@ public abstract class IndividualFileConfig<P> extends Config<P> {
     }
 
     @Override
-    public abstract Map<Type, Object> getTypeAdapters();
-
-    @Override
-    public abstract List<P> getObjects();
+    public Multimap<ResourceLocation, ConfigObject> getObjects() {
+        Multimap<ResourceLocation, ConfigObject> map = Multimaps.newMultimap(new HashMap<>(), ArrayList::new);
+        for (ConfigObject object : objects) {
+            map.put(getName(), object);
+        }
+        return map;
+    }
 
     @Override
     protected abstract void resetToDefault();
-
-    public abstract Class<P> getConfigObjectClass();
 
     @Override
     public void writeConfig() {
@@ -126,12 +129,15 @@ public abstract class IndividualFileConfig<P> extends Config<P> {
         if (!cfgDir.exists() && !cfgDir.mkdirs()) {
             return;
         }
-        for (P object : getObjects()) {
-            try {
-                FileWriter writer = new FileWriter(getConfigFile(getName(object).replaceAll(" ", "_").replaceAll("[^A-Za-z0-9_]", "").toLowerCase()));
-                GSON.toJson(object, writer);
+        for (ConfigObject object : getObjects().values()) {
+            try(
+                    FileWriter writer = new FileWriter(getConfigFile(object.getName().replaceAll(" ", "_").replaceAll("[^A-Za-z0-9_]", "").toLowerCase()));
+                    JsonWriter jsonWriter = new JsonWriter(writer)) {
+                jsonWriter.setIndent("    ");
+                jsonWriter.setSerializeNulls(true);
+                jsonWriter.setLenient(true);
+                Streams.write(object.serialize(), jsonWriter);
                 writer.flush();
-                writer.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

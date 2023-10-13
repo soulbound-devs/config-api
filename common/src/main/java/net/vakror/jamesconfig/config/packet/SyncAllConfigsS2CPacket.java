@@ -1,67 +1,45 @@
 package net.vakror.jamesconfig.config.packet;
 
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.gson.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
-import net.vakror.jamesconfig.config.config.Config;
+import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class SyncAllConfigsS2CPacket {
-    private final Map<ResourceLocation, Config<?>> configs;
+    private final Multimap<ResourceLocation, ConfigObject> configs;
 
-    public SyncAllConfigsS2CPacket(List<Config<?>> configs) {
-        this.configs = new HashMap<>();
-        for (Config<?> config : configs) {
-            this.configs.put(config.getName(), config);
-        }
+    public SyncAllConfigsS2CPacket(Multimap<ResourceLocation, ConfigObject> configs) {
+        this.configs = configs;
     }
 
     public SyncAllConfigsS2CPacket(FriendlyByteBuf buf) {
-        this.configs = new HashMap<>();
-        try {
-            CompoundTag nbt = buf.readNbt();
-            for (String key : nbt.getAllKeys()) {
-                ResourceLocation location = new ResourceLocation(nbt.getCompound(key).getString("name"));
-                if (JamesConfigMod.CODECS.get(location) == null) {
-                    JamesConfigMod.LOGGER.error("Server Contains Codec {} but client does not", location);
-                } else {
-                    Codec<? extends Config<?>> codec = JamesConfigMod.CODECS.get(location);
-                    Optional<? extends Pair<? extends Config<?>, Tag>> optional = codec.decode(NbtOps.INSTANCE, nbt.getCompound(key).get("config")).result();
-                    optional.ifPresent(tagPair -> this.configs.put(tagPair.getFirst().getName(), tagPair.getFirst()));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        this.configs = Multimaps.newMultimap(new HashMap<>(), ArrayList::new);
+        byte[] data = buf.readByteArray();
+        JsonArray object = (JsonArray) JsonParser.parseString(new String(data));
+        for (JsonElement element : object) {
+            JsonObject object1 = (JsonObject) element;
+            configs.put(new ResourceLocation(object1.get("configName").getAsString()), ConfigObject.deserializeUnknown(object1.get("object")));
         }
     }
 
     public void encode(FriendlyByteBuf buf) {
-        CompoundTag rootNbt = new CompoundTag();
-        int i = 0;
-        for (Config<?> config : configs.values()) {
-            CompoundTag tag = new CompoundTag();
-            tag.putString("name", config.getName().toString());
-            Tag configNbt = null;
-            Codec<Config<?>> codec = (Codec<Config<?>>) config.getCodec();
-            Optional<Tag> a = codec.encodeStart(NbtOps.INSTANCE, config).result();
-            if (a.isPresent()) {
-                configNbt = a.get();
-            }
-            tag.put("config", configNbt == null ? new CompoundTag(): configNbt);
-            rootNbt.put("" + i, tag);
-            i++;
-        }
-        buf.writeNbt(rootNbt);
+        JsonArray object = new JsonArray();
+        configs.forEach(((location, configObject) -> serializeObject(location, configObject, object)));
+        buf.writeByteArray(object.toString().getBytes());
+    }
+
+    public void serializeObject(ResourceLocation location, ConfigObject configObject, JsonArray array) {
+        JsonElement serialized = configObject.serialize();
+        JsonObject object = new JsonObject();
+        object.add("object", serialized);
+        object.addProperty("configName", location.toString());
+        array.add(serialized);
     }
 
     public boolean handle() {
@@ -75,17 +53,13 @@ public class SyncAllConfigsS2CPacket {
                     config.discardAllValues();
                 }
                 if (configs.containsKey(resourceLocation)) {
-                    JamesConfigMod.CONFIGS.put(resourceLocation, configs.get(config.getName()));
-                    configs.remove(resourceLocation);
+                    for (ConfigObject object : configs.get(config.getName())) {
+                        config.add(object);
+                        configs.remove(resourceLocation, object);
+                    }
                 }
             }
         }));
-        for (Config<?> config : configs.values()) {
-            if (config.shouldSync()) {
-                JamesConfigMod.LOGGER.warn("Client did not contain config {}, synced anyway", config.getName());
-                JamesConfigMod.CONFIGS.put(config.getName(), config);
-            }
-        }
         return true;
     }
 }

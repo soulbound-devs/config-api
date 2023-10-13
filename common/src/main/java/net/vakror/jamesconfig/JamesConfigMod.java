@@ -1,19 +1,20 @@
 package net.vakror.jamesconfig;
 
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.config.config.Config;
+import net.vakror.jamesconfig.config.config.object.ConfigObject;
 import net.vakror.jamesconfig.config.event.ConfigEvents;
+import net.vakror.jamesconfig.config.event.ConfigObjectRegisterEvent;
 import net.vakror.jamesconfig.config.event.ConfigRegisterEvent;
 import net.vakror.jamesconfig.config.example.ExampleConfigs;
-import net.vakror.jamesconfig.config.manager.MasterConfigManager;
-import net.vakror.jamesconfig.config.manager.NoAdapterConfigManager;
-import net.vakror.jamesconfig.config.manager.SimpleConfigManager;
+import net.vakror.jamesconfig.config.manager.MasterManager;
+import net.vakror.jamesconfig.config.manager.config.SimpleConfigManager;
+import net.vakror.jamesconfig.config.manager.object.SimpleConfigObjectManager;
 import net.vakror.jamesconfig.config.packet.ArchModPackets;
 import org.slf4j.Logger;
 
@@ -30,14 +31,14 @@ public class JamesConfigMod
 	}
 	// Directly reference a slf4j logger
 	public static final Logger LOGGER = LogUtils.getLogger();
-	public static final Map<ResourceLocation, Config<?>> CONFIGS = new HashMap<>();
-	public static final Map<ResourceLocation, Codec<? extends Config<?>>> CODECS = new HashMap<>();
+	public static final Map<ResourceLocation, Config> CONFIGS = new HashMap<>();
+	public static final Map<ResourceLocation, ConfigObject> KNOWN_OBJECT_TYPES = new HashMap<>();
 
 	public JamesConfigMod()
 	{
-		ConfigEvents.REGISTER_CONFIG_MANAGERS.register(event -> {
+		ConfigEvents.REGISTER_MANAGER.register(event -> {
 			event.addManager(SimpleConfigManager.INSTANCE);
-			event.addManager(NoAdapterConfigManager.INSTANCE);
+			event.addManager(SimpleConfigObjectManager.INSTANCE);
 			return EventResult.pass();
 		});
 
@@ -50,7 +51,7 @@ public class JamesConfigMod
 		//Call this in mod constructor or anywhere before commonsetup fires
 		ExampleConfigs.addExampleConfig();
 
-		MasterConfigManager.register();
+		MasterManager.register();
 
 		LifecycleEvent.SETUP.register(this::commonSetup);
 		ClientLifecycleEvent.CLIENT_SETUP.register((minecraft)-> ArchModPackets.register());
@@ -64,19 +65,17 @@ public class JamesConfigMod
 		CONFIGS.forEach((name, register) -> register.readConfig(replace));
 	}
 
-	public static void addConfig(ResourceLocation name, Config<?> register) {
+	public static void addConfig(ResourceLocation name, Config register) {
 		CONFIGS.put(name, register);
-	}
-
-	public static void addCodec(ResourceLocation name, Config<?> register) {
-		CODECS.put(name, register.getCodec());
 	}
 
 	private void commonSetup() {
 		ConfigRegisterEvent configRegisterEvent = new ConfigRegisterEvent();
 		ConfigEvents.CONFIG_REGISTER_EVENT.invoker().post(configRegisterEvent);
+		ConfigObjectRegisterEvent event = new ConfigObjectRegisterEvent();
+		ConfigEvents.OBJECT_REGISTER_EVENT.invoker().post(event);
+		KNOWN_OBJECT_TYPES.putAll(event.getKnownTypes());
 		configRegisterEvent.getConfigs().forEach((JamesConfigMod::addConfig));
-		configRegisterEvent.getConfigs().forEach((JamesConfigMod::addCodec));
 		registerAllConfigs(false);
 	}
 }

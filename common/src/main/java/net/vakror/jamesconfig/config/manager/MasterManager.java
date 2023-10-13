@@ -5,14 +5,14 @@ import net.vakror.jamesconfig.config.event.RegisterConfigManagersEvent;
 
 import java.util.List;
 
-public class MasterConfigManager {
+public class MasterManager {
     public static void register() {
-        getAllManagers().forEach(ConfigManager::register);
+        getAllManagers().forEach(Manager::register);
     }
 
-    public static List<ConfigManager> getAllManagers() {
+    public static List<Manager<?>> getAllManagers() {
         RegisterConfigManagersEvent event = new RegisterConfigManagersEvent();
-        ConfigEvents.REGISTER_CONFIG_MANAGERS.invoker().post(event);
+        ConfigEvents.REGISTER_MANAGER.invoker().post(event);
         return event.getManagers();
     }
 }

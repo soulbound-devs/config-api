@@ -8,14 +8,17 @@
   "authors": [],
   "contact": {},
 
-  "license": "All Rights Reserved",
+  "license": "MIT",
   "icon": "icon.png",
 
   "environment": "*",
-  "entrypoints": {},
+  "entrypoints": {
+    "main": [
+      "net.vakror.jamesconfig.fabric.JamesConfigFabric"
+    ]
+  },
   "mixins": [
-    "jamesconfig.mixins.json",
-    "jamesconfig-common.mixins.json"
+    "jamesconfig.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.23",
