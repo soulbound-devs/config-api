@@ -1,6 +1,8 @@
 package net.vakror.jamesconfig.config.config.registry;
 
+import com.google.common.base.Stopwatch;
 import net.minecraft.resources.ResourceLocation;
+import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
 public abstract class SimpleRegistryConfigImpl extends RegistryConfigImpl {
@@ -41,8 +43,11 @@ public abstract class SimpleRegistryConfigImpl extends RegistryConfigImpl {
     }
 
     @Override
-    public void discardAllValues() {
+    public void clear() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        JamesConfigMod.LOGGER.info("Clearing config");
         objects.clear();
+        JamesConfigMod.LOGGER.info("Finished Clearing config, \033[0;31mTook {}\033[0;0m", stopwatch);
     }
 
     @Override
@@ -58,10 +63,6 @@ public abstract class SimpleRegistryConfigImpl extends RegistryConfigImpl {
     @Override
     public boolean shouldAddObject(ConfigObject object) {
         return true;
-    }
-
-    @Override
-    public void onAddObject(ConfigObject object) {
     }
 
     @Override

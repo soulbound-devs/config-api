@@ -1,0 +1,83 @@
+package net.vakror.jamesconfig.config.config.setting;
+
+import com.google.common.base.Stopwatch;
+import net.minecraft.resources.ResourceLocation;
+import net.vakror.jamesconfig.JamesConfigMod;
+import net.vakror.jamesconfig.config.config.object.ConfigObject;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public abstract class SimpleSettingConfigImpl extends SettingConfigImpl {
+
+    private final String subPath;
+    private final ResourceLocation name;
+    private final String fileName;
+
+    public final Map<String, ConfigObject> values = new HashMap<>();
+
+    public SimpleSettingConfigImpl(String subPath, ResourceLocation name, String fileName) {
+        this.subPath = subPath;
+        this.name = name;
+        this.fileName = fileName;
+    }
+
+    @Override
+    public String getFileName() {
+        return fileName;
+    }
+
+    @Override
+    public void setValue(String name, ConfigObject value) {
+        if (!getRequiredSettings().containsKey(name)) {
+            JamesConfigMod.LOGGER.error("Attempted to add setting \"{}\" which is not found in required values, not adding value", name);
+        } else {
+            values.put(name, value);
+        }
+    }
+
+    @Override
+    public void clear() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        JamesConfigMod.LOGGER.info("Clearing config");
+        values.clear();
+        JamesConfigMod.LOGGER.info("Finished Clearing config, \033[0;31mTook {}\033[0;0m", stopwatch);
+    }
+
+    @Override
+    public List<ConfigObject> getAll() {
+        return values.values().stream().toList();
+    }
+
+    @Override
+    public void add(ConfigObject object) {
+        this.setValue(object.getName(), object);
+    }
+
+    @Override
+    public boolean shouldClearBeforeSync() {
+        return true;
+    }
+
+    @Override
+    public boolean shouldReadConfig() {
+        return true;
+    }
+
+    @Override
+    public String getSubPath() {
+        return subPath;
+    }
+
+    @Override
+    public ResourceLocation getName() {
+        return name;
+    }
+
+    @Override
+    public boolean shouldSync() {
+        return true;
+    }
+}
+

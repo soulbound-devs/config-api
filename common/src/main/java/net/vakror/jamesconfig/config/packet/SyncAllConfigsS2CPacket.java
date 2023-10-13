@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
+import net.vakror.jamesconfig.config.config.Config;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
 import java.util.*;
@@ -24,42 +25,57 @@ public class SyncAllConfigsS2CPacket {
         JsonArray object = (JsonArray) JsonParser.parseString(new String(data));
         for (JsonElement element : object) {
             JsonObject object1 = (JsonObject) element;
-            configs.put(new ResourceLocation(object1.get("configName").getAsString()), ConfigObject.deserializeUnknown(object1.get("object")));
+            Config config = JamesConfigMod.CONFIGS.get(new ResourceLocation(object1.get("configName").getAsString()));
+            if (config != null) {
+                List<ConfigObject> parsed = config.parse((JsonObject) object1.get("object"));
+                if (parsed != null) {
+                    for (ConfigObject configObject : parsed) {
+                        configs.put(config.getName(), configObject);
+                    }
+                }
+            }
         }
     }
 
     public void encode(FriendlyByteBuf buf) {
         JsonArray object = new JsonArray();
-        configs.forEach(((location, configObject) -> serializeObject(location, configObject, object)));
+        configs.keySet().forEach(((location) -> serializeObject(location, object)));
         buf.writeByteArray(object.toString().getBytes());
     }
 
-    public void serializeObject(ResourceLocation location, ConfigObject configObject, JsonArray array) {
-        JsonElement serialized = configObject.serialize();
-        JsonObject object = new JsonObject();
-        object.add("object", serialized);
-        object.addProperty("configName", location.toString());
-        array.add(serialized);
+    public void serializeObject(ResourceLocation location, JsonArray array) {
+        Config config = JamesConfigMod.CONFIGS.get(location);
+        if (config != null) {
+            if (config.shouldSync()) {
+                for (JsonObject jsonObject : JamesConfigMod.CONFIGS.get(location).serialize()) {
+                    JsonObject object = new JsonObject();
+                    object.add("object", jsonObject);
+                    object.addProperty("configName", location.toString());
+                    array.add(object);
+                }
+            } else {
+                JamesConfigMod.LOGGER.error("Attempted to sync unsyncable config \"{}\"", location.toString());
+            }
+        } else {
+            JamesConfigMod.LOGGER.error("Attempted to sync config object with invalid config location \"{}\"", location.toString());
+        }
     }
 
-    public boolean handle() {
-        //TODO:figure out what this is supposed Todo, ig the player request sync? i dont get it
-
+    public void handle() {
         assert Minecraft.getInstance().player != null;
 
         JamesConfigMod.CONFIGS.forEach(((resourceLocation, config) -> {
             if (config.shouldSync()) {
                 if (config.shouldClearBeforeSync()) {
-                    config.discardAllValues();
+                    config.clear();
                 }
                 if (configs.containsKey(resourceLocation)) {
-                    for (ConfigObject object : configs.get(config.getName())) {
+                    for (ConfigObject object : configs.get(resourceLocation)) {
                         config.add(object);
-                        configs.remove(resourceLocation, object);
                     }
+                    configs.removeAll(resourceLocation);
                 }
             }
         }));
-        return true;
     }
 }

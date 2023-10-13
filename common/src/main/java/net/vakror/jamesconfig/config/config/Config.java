@@ -1,11 +1,12 @@
 package net.vakror.jamesconfig.config.config;
 
-import com.google.common.collect.Multimap;
+import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.List;
 
 public abstract class Config {
     public abstract void generateConfig();
@@ -13,20 +14,7 @@ public abstract class Config {
     @NotNull
     public abstract File getConfigDir();
 
-    @NotNull
-    public abstract File getConfigFile(String fileName);
-
     public abstract String getSubPath();
-
-    public abstract boolean isValueAcceptable(ConfigObject value);
-
-    public abstract boolean shouldDiscardConfigOnUnacceptableValue();
-
-    public abstract void invalidate();
-
-    public abstract void discardValue(ConfigObject object);
-
-    public abstract void discardAllValues();
 
     public abstract ResourceLocation getName();
 
@@ -37,21 +25,11 @@ public abstract class Config {
 
     public abstract void readConfig(boolean overrideCurrent);
 
-    public abstract void add(ConfigObject object);
-
-    public abstract boolean isValid();
-
     public abstract boolean shouldReadConfig();
 
-    public abstract boolean shouldAddObject(ConfigObject object);
-
-    public abstract void onAddObject(ConfigObject object);
-
-    public abstract Multimap<ResourceLocation, ConfigObject> getObjects();
-
-    protected abstract void resetToDefault();
-
     public abstract void writeConfig();
+
+    public abstract List<JsonObject> serialize();
 
     /**
      *
@@ -64,4 +42,12 @@ public abstract class Config {
      * @return whether to sync
      */
     public abstract boolean shouldSync();
+
+    public abstract void add(ConfigObject object);
+
+    public abstract List<ConfigObject> getAll();
+
+    public abstract List<ConfigObject> parse(JsonObject jsonObject);
+
+    public abstract void clear();
 }

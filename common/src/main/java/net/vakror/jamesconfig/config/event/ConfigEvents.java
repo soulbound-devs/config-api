@@ -4,6 +4,7 @@ import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
 import dev.architectury.event.EventResult;
 
+@SuppressWarnings("all")
 public class ConfigEvents {
     //@James usually in a fabric/architectury sense registries are static and non frozen anyways, so the registry wouldnt be event based
     //but instead be just a map you can add yourself to, i am keeping the event wrapper for now

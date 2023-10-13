@@ -4,8 +4,6 @@ import dev.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Function;
-
 public abstract class SimpleSidedRegistryConfigImpl extends SimpleRegistryConfigImpl {
     private final EnvType side;
     public SimpleSidedRegistryConfigImpl(EnvType side, String subPath, ResourceLocation name) {

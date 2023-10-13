@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ArchModPackets {
-    public static ResourceLocation packetID = new ResourceLocation(JamesConfigMod.MOD_ID,"config_sync_packet");
+    public static final ResourceLocation syncPacketId = new ResourceLocation(JamesConfigMod.MOD_ID,"config_sync_packet");
 
     public static void register(){
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C,packetID,(buf,context)->{
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, syncPacketId,(buf, context)->{
             SyncAllConfigsS2CPacket syncAllConfigsS2CPacket = new SyncAllConfigsS2CPacket(buf);
             syncAllConfigsS2CPacket.handle();
         });
@@ -28,10 +28,12 @@ public class ArchModPackets {
         FriendlyByteBuf buf =new FriendlyByteBuf(Unpooled.buffer());
         Multimap<ResourceLocation, ConfigObject> map = Multimaps.newMultimap(new HashMap<>(), ArrayList::new);
         for (Config config : JamesConfigMod.CONFIGS.values()) {
-            map.putAll(config.getObjects());
+            if (config.shouldSync()) {
+                map.putAll(config.getName(), config.getAll());
+            }
         }
         SyncAllConfigsS2CPacket syncAllConfigsS2CPacket = new SyncAllConfigsS2CPacket(map);
         syncAllConfigsS2CPacket.encode(buf);
-        NetworkManager.sendToPlayer(player,packetID,buf);
+        NetworkManager.sendToPlayer(player, syncPacketId,buf);
     }
 }

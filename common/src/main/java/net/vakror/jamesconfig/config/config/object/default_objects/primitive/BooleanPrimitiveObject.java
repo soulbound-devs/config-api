@@ -2,7 +2,6 @@ package net.vakror.jamesconfig.config.config.object.default_objects.primitive;
 
 import com.mojang.serialization.Codec;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
-import net.vakror.jamesconfig.config.config.object.PrimitiveObject;
 
 public class BooleanPrimitiveObject extends PrimitiveObject<Boolean> {
 

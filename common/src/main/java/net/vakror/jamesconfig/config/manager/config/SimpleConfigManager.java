@@ -9,7 +9,7 @@ public class SimpleConfigManager extends ConfigManager {
 
     public static final SimpleConfigManager INSTANCE = new SimpleConfigManager();
 
-    List<Config> configs = new ArrayList<>();
+    private final List<Config> configs = new ArrayList<>();
 
     @Override
     public void register(Config config) {

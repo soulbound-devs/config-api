@@ -2,7 +2,7 @@ package net.vakror.jamesconfig.config.config.object.default_objects.primitive.nu
 
 import com.mojang.serialization.Codec;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
-import net.vakror.jamesconfig.config.config.object.PrimitiveObject;
+import net.vakror.jamesconfig.config.config.object.default_objects.primitive.PrimitiveObject;
 
 public class FloatPrimitiveObject extends PrimitiveObject<Float> {
 

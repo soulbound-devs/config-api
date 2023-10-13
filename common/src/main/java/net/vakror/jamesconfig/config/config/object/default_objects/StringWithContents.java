@@ -18,7 +18,7 @@ public class StringWithContents extends ConfigObject {
     ).apply(instance, StringWithContents::new));
 
     String name;
-    String content;
+    private final String content;
 
     public StringWithContents(ResourceLocation type, String name, String content) {
         this(name, content);

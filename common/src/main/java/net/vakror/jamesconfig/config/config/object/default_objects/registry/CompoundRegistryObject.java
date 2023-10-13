@@ -1,4 +1,4 @@
-package net.vakror.jamesconfig.config.config.object.default_objects;
+package net.vakror.jamesconfig.config.config.object.default_objects.registry;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,42 +9,26 @@ import net.vakror.jamesconfig.config.config.object.ConfigObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompoundObject extends ConfigObject {
+public class CompoundRegistryObject extends RegistryConfigObject {
     public List<ConfigObject> objects = new ArrayList<>();
-    public String name;
 
-    public CompoundObject(String name, List<ConfigObject> objects) {
+    public CompoundRegistryObject(String name, List<ConfigObject> objects) {
         this(name);
         this.objects = objects;
     }
 
-    public CompoundObject(String name) {
-        super(name);
+    public CompoundRegistryObject(String name) {
+        super(name, new ResourceLocation(JamesConfigMod.MOD_ID, "compound"));
     }
-
+    
     public void addObject(ConfigObject object) {
         objects.add(object);
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public ResourceLocation getType() {
-        return new ResourceLocation(JamesConfigMod.MOD_ID, "compound");
-    }
-
-    @Override
     public JsonElement serialize() {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("name", name);
+        jsonObject.addProperty("type", getType().toString());
         for (ConfigObject object : objects) {
             jsonObject.add(object.getName(), object.serialize());
         }
@@ -53,8 +37,8 @@ public class CompoundObject extends ConfigObject {
 
     @Override
     public ConfigObject deserialize(String name, JsonElement element) {
-        JsonObject object = new JsonObject();
-        CompoundObject compoundObject = new CompoundObject(object.get("name").getAsString());
+        JsonObject object = (JsonObject) element;
+        CompoundRegistryObject compoundObject = new CompoundRegistryObject(name);
 
         for (String key : object.keySet()) {
             ConfigObject configObject = ConfigObject.deserializeUnknown(key, object.get(key));

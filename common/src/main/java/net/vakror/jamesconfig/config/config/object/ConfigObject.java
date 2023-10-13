@@ -64,9 +64,9 @@ public abstract class ConfigObject {
                 return new ShortPrimitiveObject(shortt, name);
             }
         } else if (element.isString()) {
-            return new StringPrimitiveObject(element.getAsString());
+            return new StringPrimitiveObject(element.getAsString(), name);
         } else if (element.isBoolean()) {
-            return new BooleanPrimitiveObject(element.getAsBoolean());
+            return new BooleanPrimitiveObject(element.getAsBoolean(), name);
         }
         return null;
     }
