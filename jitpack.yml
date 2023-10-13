@@ -1,4 +1,3 @@
 before_install:
-  - sdk list java
-  - sdk install java 17.0.4-open
-  - sdk use java 17.0.4-open
+  - sdk install java 17.0.8-jbr
+  - sdk use java 17.0.8-jbr
