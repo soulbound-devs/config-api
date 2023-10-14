@@ -9,6 +9,7 @@ import net.vakror.jamesconfig.config.config.object.default_objects.setting.Simpl
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A compound object to be used in registry configs
@@ -72,7 +73,8 @@ public class CompoundRegistryObject extends RegistryConfigObject {
         JsonObject object = (JsonObject) element;
         CompoundRegistryObject compoundObject = new CompoundRegistryObject(name);
 
-        for (String key : object.keySet()) {
+        for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
+            String key = entry.getKey();
             ConfigObject configObject = ConfigObject.deserializeUnknown(key, object.get(key));
             if (configObject != null) {
                 compoundObject.addObject(configObject);

@@ -60,20 +60,21 @@ public abstract class SettingConfigObject implements ConfigObject {
     public ConfigObject deserializeSettingValues(String key, JsonObject jsonObject, String configName) {
         setRequiredSettingsMap();
         SettingConfigObject definition = newDefinition(key);
-        for (String jsonKey : jsonObject.keySet()) {
+        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+            String jsonKey = entry.getKey();
             if (!requiredSettings.containsKey(jsonKey)) {
                 JamesConfigMod.LOGGER.error("Key {} present in object {} of config {}, even though it was not requested", jsonKey, key, configName);
             } else {
                 ConfigObject object = requiredSettings.get(jsonKey);
                 if (object instanceof SettingConfigObject settingConfigObject) {
-                    if (!jsonObject.get(jsonKey).isJsonObject()) {
+                    if (!entry.getValue().isJsonObject()) {
                         JamesConfigMod.LOGGER.error("Config setting definition {} of object {} in config {} is not json object", jsonKey, key, configName);
                     }
-                    ConfigObject object1 = settingConfigObject.deserializeSettingValues(jsonKey, (JsonObject) jsonObject.get(jsonKey), configName);
+                    ConfigObject object1 = settingConfigObject.deserializeSettingValues(jsonKey, (JsonObject) entry.getValue(), configName);
                     object1.setName(jsonKey);
                     definition.setValue(jsonKey, object1);
                 } else if (object != null){
-                    ConfigObject object1 = object.deserialize(jsonKey, jsonObject.get(jsonKey), requiredSettings.get(jsonKey));
+                    ConfigObject object1 = object.deserialize(jsonKey, entry.getValue(), requiredSettings.get(jsonKey));
                     object1.setName(jsonKey);
                     definition.setValue(jsonKey, object1);
                 }

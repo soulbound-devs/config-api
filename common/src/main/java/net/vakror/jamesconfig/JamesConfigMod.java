@@ -1,7 +1,6 @@
 package net.vakror.jamesconfig;
 
 import com.google.common.base.Stopwatch;
-import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
@@ -17,7 +16,8 @@ import net.vakror.jamesconfig.config.manager.MasterManager;
 import net.vakror.jamesconfig.config.manager.config.SimpleConfigManager;
 import net.vakror.jamesconfig.config.manager.object.SimpleConfigObjectManager;
 import net.vakror.jamesconfig.config.packet.ArchModPackets;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ public class JamesConfigMod
 		new JamesConfigMod();
 	}
 	// Directly reference a slf4j logger
-	public static final Logger LOGGER = LogUtils.getLogger();
+	public static final Logger LOGGER = LogManager.getLogger();
 	public static final Map<ResourceLocation, Config> CONFIGS = new HashMap<>();
 	public static final Map<ResourceLocation, ConfigObject> KNOWN_OBJECT_TYPES = new HashMap<>();
 

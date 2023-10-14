@@ -21,7 +21,18 @@
     "jamesconfig.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.23",
-    "minecraft": ">=1.19.2"
+    "fabricloader": ">=0.14.22",
+    "architectury": ">=2",
+    "minecraft": ">=1.17.1"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "GitHub": "https://github.com/vaylor27/config",
+        "Issues": "https://github.com/vaylor27/config/issues"
+      },
+      "badges": [ "library" ],
+      "update_checker": false
+    }
   }
 }

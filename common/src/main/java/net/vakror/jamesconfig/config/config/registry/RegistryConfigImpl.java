@@ -80,7 +80,7 @@ public abstract class RegistryConfigImpl extends Config {
                         try (FileReader reader = new FileReader(file)) {
                             Stopwatch stopwatch1 = Stopwatch.createStarted();
                             JamesConfigMod.LOGGER.info("Reading config object {} for config: " + this.getName(), file.getName());
-                            JsonObject jsonObject = (JsonObject) JsonParser.parseReader(reader);
+                            JsonObject jsonObject = (JsonObject) new JsonParser().parse(reader);
                             currentFile = file;
                             List<ConfigObject> configObjects = parse(jsonObject);
                             if (configObjects != null) {

@@ -84,7 +84,7 @@ public abstract class SettingConfigImpl extends Config {
                     File file = getConfigFile();
                     if (file.exists()) {
                         try (FileReader reader = new FileReader(file)) {
-                            JsonObject jsonObject = (JsonObject) JsonParser.parseReader(reader);
+                            JsonObject jsonObject = (JsonObject) new JsonParser().parse(reader);
                             List<ConfigObject> configObjects = parse(jsonObject);
                             Stopwatch stopwatch1 = Stopwatch.createStarted();
                             JamesConfigMod.LOGGER.info("Setting values in config {} to parsed value", this);
@@ -122,21 +122,22 @@ public abstract class SettingConfigImpl extends Config {
         Stopwatch stopwatch = Stopwatch.createStarted();
         JamesConfigMod.LOGGER.info("Parsing config: " + this.getName());
         List<ConfigObject> list = new ArrayList<>();
-        for (String key : jsonObject.keySet()) {
+        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+            String key = entry.getKey();
             if (!requiredSettingsMap.containsKey(key)) {
                 JamesConfigMod.LOGGER.error("Key {} present in config {}, even though it was not requested", key, getFileName());
             } else {
                 ConfigObject object = requiredSettingsMap.get(key);
                 try {
                     if (object instanceof SettingConfigObject settingConfigObject) {
-                        if (!jsonObject.get(key).isJsonObject()) {
+                        if (!entry.getValue().isJsonObject()) {
                             JamesConfigMod.LOGGER.error("Config setting definition {} in config {} is not json object", key, getName());
                         }
-                        ConfigObject object1 = settingConfigObject.deserializeSettingValues(key, (JsonObject) jsonObject.get(key), getName().toString());
+                        ConfigObject object1 = settingConfigObject.deserializeSettingValues(key, (JsonObject) entry.getValue(), getName().toString());
                         object1.setName(key);
                         list.add(object1);
                     } else if (object != null) {
-                        ConfigObject object1 = object.deserialize(key, jsonObject.get(key), this.requiredSettingsMap.get(key));
+                        ConfigObject object1 = object.deserialize(key, entry.getValue(), this.requiredSettingsMap.get(key));
                         object1.setName(key);
                         list.add(object1);
                     }

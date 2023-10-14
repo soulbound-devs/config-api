@@ -22,7 +22,7 @@ public class SyncAllConfigsS2CPacket {
     public SyncAllConfigsS2CPacket(FriendlyByteBuf buf) {
         this.configs = Multimaps.newMultimap(new HashMap<>(), ArrayList::new);
         byte[] data = buf.readByteArray();
-        JsonArray object = (JsonArray) JsonParser.parseString(new String(data));
+        JsonArray object = (JsonArray) new JsonParser().parse(new String(data));
         for (JsonElement element : object) {
             JsonObject object1 = (JsonObject) element;
             Config config = JamesConfigMod.CONFIGS.get(new ResourceLocation(object1.get("configName").getAsString()));
