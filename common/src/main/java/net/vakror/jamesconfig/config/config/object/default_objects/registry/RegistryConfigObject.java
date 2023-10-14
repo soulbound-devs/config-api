@@ -3,13 +3,13 @@ package net.vakror.jamesconfig.config.config.object.default_objects.registry;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
-public abstract class RegistryConfigObject extends ConfigObject {
+public abstract class RegistryConfigObject implements ConfigObject {
 
     private String name;
     private final ResourceLocation type;
 
     public RegistryConfigObject(String name, ResourceLocation type) {
-        super(name);
+        setName(name);
         this.type = type;
     }
 

@@ -11,18 +11,15 @@ import net.vakror.jamesconfig.config.config.object.default_objects.primitive.Num
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.StringPrimitiveObject;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class ConfigObject {
-    public ConfigObject(String name) {
-        setName(name);
-    }
-    public abstract String getName();
-    public abstract void setName(String name);
-    public abstract ResourceLocation getType();
-    public abstract JsonElement serialize();
-    public abstract ConfigObject deserialize(@Nullable String name, JsonElement element, ConfigObject defaultValue);
+public interface ConfigObject {
+    String getName();
+    void setName(String name);
+    ResourceLocation getType();
+    JsonElement serialize();
+    ConfigObject deserialize(@Nullable String name, JsonElement element, ConfigObject defaultValue);
 
     @Nullable
-    public static ConfigObject deserializeUnknown(JsonElement element) {
+    static ConfigObject deserializeUnknown(JsonElement element) {
         if (element instanceof JsonObject object) {
             return deserializeFromObject(null, object);
         } else if (element instanceof JsonPrimitive primitive) {
@@ -33,7 +30,7 @@ public abstract class ConfigObject {
     }
 
     @Nullable
-    public static ConfigObject deserializeUnknown(String name, JsonElement element) {
+    static ConfigObject deserializeUnknown(String name, JsonElement element) {
         if (element instanceof JsonObject object) {
             return deserializeFromObject(name, object);
         } else if (element instanceof JsonPrimitive primitive) {
@@ -43,7 +40,7 @@ public abstract class ConfigObject {
         }
     }
 
-    public static ConfigObject deserializePrimitive(String name, JsonPrimitive element) {
+    static ConfigObject deserializePrimitive(String name, JsonPrimitive element) {
         if (element.isNumber()) {
             Number number = element.getAsNumber();
             return new NumberPrimitiveObject(number, name);

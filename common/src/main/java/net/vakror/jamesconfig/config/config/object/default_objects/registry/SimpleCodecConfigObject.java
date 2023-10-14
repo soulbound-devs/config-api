@@ -8,9 +8,9 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
-public abstract class SimpleCodecConfigObject<P> extends ConfigObject {
+public abstract class SimpleCodecConfigObject<P> implements ConfigObject {
     public SimpleCodecConfigObject(String name) {
-        super(name);
+        setName(name);
     }
 
     public abstract Codec<P> getCodec();

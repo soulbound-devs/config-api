@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
-public class StringWithContents extends ConfigObject {
+public class StringWithContents implements ConfigObject {
 
     public static final Codec<StringWithContents> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("type").forGetter(StringWithContents::getType),
@@ -25,7 +25,7 @@ public class StringWithContents extends ConfigObject {
     }
 
     public StringWithContents(String name, String content) {
-        super(name);
+        setName(name);
         this.content = content;
     }
 

@@ -5,17 +5,16 @@ import com.google.gson.JsonPrimitive;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
-public abstract class PrimitiveObject<P> extends ConfigObject {
+public abstract class PrimitiveObject<P> implements ConfigObject {
     protected final P content;
     protected String name;
 
     public PrimitiveObject(P content, String name) {
-        super(name);
+        setName(name);
         this.content = content;
     }
 
     public PrimitiveObject(P content) {
-        super(null);
         this.content = content;
     }
 

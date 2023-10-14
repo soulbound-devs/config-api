@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class SettingConfigObject extends ConfigObject {
+public abstract class SettingConfigObject implements ConfigObject {
     String name;
     public Map<String, ConfigObject> requiredSettings = new HashMap<>(getRequiredSettings().size());
     public SettingConfigObject(String name) {
-        super(name);
+        setName(name);
     }
 
     public abstract void setValue(String name, ConfigObject value);
