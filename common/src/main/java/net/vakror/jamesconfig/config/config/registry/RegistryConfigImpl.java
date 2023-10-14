@@ -79,7 +79,7 @@ public abstract class RegistryConfigImpl extends Config {
                     for (File file : configFiles) {
                         try (FileReader reader = new FileReader(file)) {
                             Stopwatch stopwatch1 = Stopwatch.createStarted();
-                            JamesConfigMod.LOGGER.info("Reading config object {} for config: " + this.getName(), file.getName());
+                            JamesConfigMod.LOGGER.info("Reading config object {} for config {}", this, file.getName());
                             JsonObject jsonObject = (JsonObject) new JsonParser().parse(reader);
                             currentFile = file;
                             List<ConfigObject> configObjects = parse(jsonObject);
@@ -118,7 +118,7 @@ public abstract class RegistryConfigImpl extends Config {
                     this.objects.clear();
                     readConfig(false, false);
                 }
-                JamesConfigMod.LOGGER.info("Successfully Overwrote Config: " + this.getName());
+                JamesConfigMod.LOGGER.info("Successfully Overwrote config {}", this);
             }
             if (!this.isValid()) {
                 JamesConfigMod.LOGGER.error("Config {} was found to be invalid, discarding all values", this.getName());
@@ -154,7 +154,7 @@ public abstract class RegistryConfigImpl extends Config {
 
     @Override
     public List<ConfigObject> getAll() {
-        return new ArrayList<>(objects);
+        return objects;
     }
 
     public abstract void discardValue(ConfigObject object);
@@ -164,11 +164,21 @@ public abstract class RegistryConfigImpl extends Config {
     protected abstract void resetToDefault();
     @Override
     public void writeConfig() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        JamesConfigMod.LOGGER.info("Writing config {}", this);
         File cfgDir = this.getConfigDir();
-        if (!cfgDir.exists() && !cfgDir.mkdirs()) {
-            return;
+        if (!cfgDir.exists()) {
+            Stopwatch stopwatch1 = Stopwatch.createStarted();
+            JamesConfigMod.LOGGER.info("Attempting to create config directory {}", cfgDir.getPath());
+            if (!cfgDir.mkdirs()) {
+                JamesConfigMod.LOGGER.error("Failed to create config directory {}, \033[0;31mTook {}\033[0;0m", cfgDir.getPath(), stopwatch1);
+                return;
+            }
+            JamesConfigMod.LOGGER.info("Finished creating config directory {}, \033[0;31mTook {}\033[0;0m", cfgDir.getPath(), stopwatch1);
         }
         for (ConfigObject object: getAll()) {
+            Stopwatch stopwatch1 = Stopwatch.createStarted();
+            JamesConfigMod.LOGGER.info("Attempting to write config object {} for config {}", object.getName(), this);
             try(
                     FileWriter writer = new FileWriter(getConfigFile(object.getName().replaceAll(" ", "_").replaceAll("[^A-Za-z0-9_]", "").toLowerCase()));
                     JsonWriter jsonWriter = new JsonWriter(writer)) {
@@ -176,27 +186,36 @@ public abstract class RegistryConfigImpl extends Config {
                 jsonWriter.setSerializeNulls(true);
                 jsonWriter.setLenient(true);
                 if (!(object.serialize() instanceof JsonObject)) {
-                    JamesConfigMod.LOGGER.error("Config file MUST have json object at root! Skipping writing file.");
+                    JamesConfigMod.LOGGER.error("Config object {} in config {} does not have a json object at root, skipping write", object.getName(), this);
                 } else {
                     Streams.write(object.serialize(), jsonWriter);
                     writer.flush();
                 }
+                JamesConfigMod.LOGGER.info("Successfully wrote config object {} for config {}, \033[0;31mTook {}\033[0;0m", object.getName(), this, stopwatch1);
             } catch (IOException e) {
+                JamesConfigMod.LOGGER.error("Failed to write config object {} for config {}, \033[0;31mTook {}\033[0;0m", object.getName(), this, stopwatch1);
                 e.printStackTrace();
             }
         }
+        JamesConfigMod.LOGGER.info("Finished writing config, \033[0;31mTook {}\033[0;0m", stopwatch);
     }
 
     @Override
     public List<JsonObject> serialize() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        JamesConfigMod.LOGGER.info("Writing config {} to network", this);
         List<JsonObject> jsonObject = new ArrayList<>();
         for (ConfigObject object : getAll()) {
+            Stopwatch stopwatch1 = Stopwatch.createStarted();
+            JamesConfigMod.LOGGER.info("Writing config object {} in config {} to network", object.getName(), this);
             if (!(object.serialize() instanceof JsonObject)) {
-                JamesConfigMod.LOGGER.error("Config file MUST have json object at root! Skipping writing element.");
+                JamesConfigMod.LOGGER.error("Config object {} in config {} does not have a json object at root, skipping write, \033[0;31mTook {}\033[0;0m", object.getName(), this, stopwatch1);
             } else {
                 jsonObject.add((JsonObject) object.serialize());
+                JamesConfigMod.LOGGER.info("Finished writing config object {} in config {} to network, \033[0;31mTook {}\033[0;0m", object.getName(), this, stopwatch1);
             }
         }
+        JamesConfigMod.LOGGER.info("Finished writing config {} to network, \033[0;31mTook {}\033[0;0m", this, stopwatch);
         return jsonObject;
     }
 }

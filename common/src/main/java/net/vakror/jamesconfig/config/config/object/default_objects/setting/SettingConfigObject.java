@@ -6,45 +6,52 @@ import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class SettingConfigObject implements ConfigObject {
-    String name;
-    public Map<String, ConfigObject> requiredSettings = new HashMap<>(getRequiredSettings().size());
-    public SettingConfigObject(String name) {
-        setName(name);
-    }
-
+/**
+ * A config object with a special deserialize method which checks for required settings
+ */
+public interface SettingConfigObject extends ConfigObject {
+    /**
+     * Sets the value of a setting
+     * @param name the name of the setting to set a value to (in case the config's name is null
+     * @param value the value to set the setting to
+     */
     public abstract void setValue(String name, ConfigObject value);
 
+    /**
+     * Queries a {@link Map}<{@link String}, {@link ConfigObject}>, where {@link String} is the name of the setting, and {@link ConfigObject} is the value of the setting
+     * @return all of the values contained in this object
+     */
     public abstract Map<String, ConfigObject> getValues();
 
+    /**
+     * Query the settings that can be present in this config object
+     * @return
+     */
     public abstract List<ConfigObject> getRequiredSettings();
+
+    /**
+     * Query the settings that can be present in this config object
+     * @return
+     */
+    public abstract Map<String, ConfigObject> getRequiredSettingsAsMap();
 
     public abstract SettingConfigObject newDefinition(String name);
 
-    public final void setRequiredSettingsMap() {
-        if (requiredSettings.isEmpty()) {
+    default void setRequiredSettingsMap() {
+        if (getRequiredSettingsAsMap().isEmpty()) {
             for (ConfigObject requiredSetting : getRequiredSettings()) {
-                requiredSettings.put(requiredSetting.getName(), requiredSetting);
+                getRequiredSettingsAsMap().put(requiredSetting.getName(), requiredSetting);
             }
         }
     }
 
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
+    public abstract boolean hasValue(String name);
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public JsonObject serialize() {
+    default JsonObject serialize() {
         JsonObject object = new JsonObject();
         for (String key : getValues().keySet()) {
             object.add(key, getValues().get(key).serialize());
@@ -53,19 +60,19 @@ public abstract class SettingConfigObject implements ConfigObject {
     }
 
     @Override
-    public ConfigObject deserialize(@Nullable String name, JsonElement element, ConfigObject defaultValue) {
+    default ConfigObject deserialize(@Nullable String name, JsonElement element, ConfigObject defaultValue) {
         return null;
     }
 
-    public ConfigObject deserializeSettingValues(String key, JsonObject jsonObject, String configName) {
+    default ConfigObject deserializeSettingValues(String key, JsonObject jsonObject, String configName) {
         setRequiredSettingsMap();
         SettingConfigObject definition = newDefinition(key);
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             String jsonKey = entry.getKey();
-            if (!requiredSettings.containsKey(jsonKey)) {
+            if (!getRequiredSettingsAsMap().containsKey(jsonKey)) {
                 JamesConfigMod.LOGGER.error("Key {} present in object {} of config {}, even though it was not requested", jsonKey, key, configName);
             } else {
-                ConfigObject object = requiredSettings.get(jsonKey);
+                ConfigObject object = getRequiredSettingsAsMap().get(jsonKey);
                 if (object instanceof SettingConfigObject settingConfigObject) {
                     if (!entry.getValue().isJsonObject()) {
                         JamesConfigMod.LOGGER.error("Config setting definition {} of object {} in config {} is not json object", jsonKey, key, configName);
@@ -74,7 +81,7 @@ public abstract class SettingConfigObject implements ConfigObject {
                     object1.setName(jsonKey);
                     definition.setValue(jsonKey, object1);
                 } else if (object != null){
-                    ConfigObject object1 = object.deserialize(jsonKey, entry.getValue(), requiredSettings.get(jsonKey));
+                    ConfigObject object1 = object.deserialize(jsonKey, entry.getValue(), getRequiredSettingsAsMap().get(jsonKey));
                     object1.setName(jsonKey);
                     definition.setValue(jsonKey, object1);
                 }

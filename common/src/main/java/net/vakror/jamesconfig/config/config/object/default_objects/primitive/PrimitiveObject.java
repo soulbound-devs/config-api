@@ -5,6 +5,8 @@ import com.google.gson.JsonPrimitive;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
+import java.util.Objects;
+
 /**
  * Representation of a primitive (a {@link Number}, {@link Boolean}, or {@link String} as a {@link ConfigObject}
  * Primitives are deserialized using {@link ConfigObject#deserializePrimitive}
@@ -110,5 +112,17 @@ public abstract class PrimitiveObject<P> implements ConfigObject {
      */
     public P getValue() {
         return content;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PrimitiveObject<?> that)) return false;
+        return Objects.equals(name, that.name) && Objects.equals(getValue(), that.getValue());
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 }

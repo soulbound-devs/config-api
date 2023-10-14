@@ -79,7 +79,7 @@ public abstract class SettingConfigImpl extends Config {
         if (shouldReadConfig()) {
             if (!overrideCurrent) {
                 Stopwatch stopwatch = Stopwatch.createStarted();
-                JamesConfigMod.LOGGER.info("Reading config: " + this.getName());
+                JamesConfigMod.LOGGER.info("Reading config {}", this);
                 try {
                     File file = getConfigFile();
                     if (file.exists()) {
@@ -111,7 +111,7 @@ public abstract class SettingConfigImpl extends Config {
                 JamesConfigMod.LOGGER.info("Finished reading config, \033[0;31mTook {}\033[0;0m", stopwatch);
             } else {
                 this.generateConfig();
-                JamesConfigMod.LOGGER.info("Successfully Overwrote Config: " + this.getName());
+                JamesConfigMod.LOGGER.info("Successfully Overwrote config {}", this);
             }
         }
     }
@@ -120,7 +120,7 @@ public abstract class SettingConfigImpl extends Config {
     public List<ConfigObject> parse(JsonObject jsonObject) {
         setRequiredSettingsMap();
         Stopwatch stopwatch = Stopwatch.createStarted();
-        JamesConfigMod.LOGGER.info("Parsing config: " + this.getName());
+        JamesConfigMod.LOGGER.info("Parsing config {}", this);
         List<ConfigObject> list = new ArrayList<>();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             String key = entry.getKey();
@@ -156,7 +156,7 @@ public abstract class SettingConfigImpl extends Config {
     @Override
     public void writeConfig() {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        JamesConfigMod.LOGGER.info("Writing config: " + this.getName());
+        JamesConfigMod.LOGGER.info("Writing config {}", this);
         File cfgDir = this.getConfigDir();
         if (!cfgDir.exists() && !cfgDir.mkdirs()) {
             return;

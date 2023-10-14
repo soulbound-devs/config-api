@@ -10,6 +10,7 @@ import net.vakror.jamesconfig.config.config.object.default_objects.setting.Simpl
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A compound object to be used in registry configs
@@ -82,5 +83,17 @@ public class CompoundRegistryObject extends RegistryConfigObject {
         }
         compoundObject.setName(name);
         return compoundObject;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CompoundRegistryObject that)) return false;
+        return Objects.equals(objects, that.objects) && Objects.equals(getName(), that.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return getName().hashCode();
     }
 }

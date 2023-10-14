@@ -8,6 +8,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
+import java.util.Objects;
+
 public class StringWithContents implements ConfigObject {
 
     public static final Codec<StringWithContents> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -47,6 +49,18 @@ public class StringWithContents implements ConfigObject {
     @Override
     public JsonElement serialize() {
         return CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow(false, (s) -> {throw new IllegalStateException(s);});
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StringWithContents that)) return false;
+        return Objects.equals(name, that.name) && Objects.equals(content, that.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 
     @Override

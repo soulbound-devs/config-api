@@ -11,7 +11,6 @@ import net.vakror.jamesconfig.config.config.setting.SimpleSettingConfigImpl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ExampleSettingConfig extends SimpleSettingConfigImpl {
     public ExampleSettingConfig() {
@@ -41,7 +40,7 @@ public class ExampleSettingConfig extends SimpleSettingConfigImpl {
 
         @Override
         public SettingConfigObject newDefinition(String name)  {
-            return new TestSettingObject(null);
+            return new TestSettingObject(name);
         }
     }
 }
