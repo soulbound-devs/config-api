@@ -3,11 +3,11 @@ package net.vakror.jamesconfig.config.config.object;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.internal.LazilyParsedNumber;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.BooleanPrimitiveObject;
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.NumberPrimitiveObject;
+import net.vakror.jamesconfig.config.config.object.default_objects.primitive.PrimitiveObject;
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.StringPrimitiveObject;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,7 +40,7 @@ public interface ConfigObject {
         }
     }
 
-    static ConfigObject deserializePrimitive(String name, JsonPrimitive element) {
+    static PrimitiveObject<?> deserializePrimitive(String name, JsonPrimitive element) {
         if (element.isNumber()) {
             Number number = element.getAsNumber();
             return new NumberPrimitiveObject(number, name);

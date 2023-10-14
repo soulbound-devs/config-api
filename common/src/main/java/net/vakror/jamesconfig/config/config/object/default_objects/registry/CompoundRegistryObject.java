@@ -5,26 +5,51 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
+import net.vakror.jamesconfig.config.config.object.default_objects.setting.SimpleSettingConfigObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A compound object to be used in registry configs
+ * Unlike {@link SimpleSettingConfigObject}, this class is not meant to be extended
+ */
 public class CompoundRegistryObject extends RegistryConfigObject {
+    /**
+     * a list of sub-objects to serialize and deserialize
+     * do not modify directly, instead, use {@link #addObject}
+     */
     public List<ConfigObject> objects = new ArrayList<>();
 
+    /**
+     * A simple constructor which initializes {@link #objects}
+     * @param name the name of this registry object
+     * @param objects the initial value of {@link #objects}
+     */
     public CompoundRegistryObject(String name, List<ConfigObject> objects) {
         this(name);
         this.objects = objects;
     }
 
+    /**
+     * @param name the name of this registry object
+     */
     public CompoundRegistryObject(String name) {
         super(name, new ResourceLocation(JamesConfigMod.MOD_ID, "compound"));
     }
-    
+
+    /**
+     * a simple method which adds objects to the compound
+     * @param object the object to add
+     */
     public void addObject(ConfigObject object) {
         objects.add(object);
     }
 
+    /**
+     * A mirror method to {@link #deserialize} to serialize this compound and all children, including other compounds into a {@link JsonElement}
+     * @return the serialized version of this compound
+     */
     @Override
     public JsonElement serialize() {
         JsonObject jsonObject = new JsonObject();
@@ -35,6 +60,13 @@ public class CompoundRegistryObject extends RegistryConfigObject {
         return jsonObject;
     }
 
+    /**
+     * A mirror method to {@link #serialize)} which deserializes this compound and all children, including other compounds, from a {@link JsonElement}
+     * @param name the name of the compound
+     * @param element the {@link JsonElement} to deserialize from
+     * @param defaultValue the default value – used if the element is invalid or the wrong type to reset the value of the primitive to default, null if called from a registry config
+     * @return the deserialized form of the compound
+     */
     @Override
     public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue) {
         JsonObject object = (JsonObject) element;
