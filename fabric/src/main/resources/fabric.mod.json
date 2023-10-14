@@ -4,12 +4,12 @@
   "version": "${version}",
 
   "name": "James Config",
-  "description": "",
-  "authors": [],
+  "description": "A simple, lightweight, and (almost) dependency-free config mod for both fabric and forge!",
+  "authors": ["Vakror Alor (ItsMeNotJames), Smartin"],
   "contact": {},
 
   "license": "MIT",
-  "icon": "icon.png",
+  "icon": "config.png",
 
   "environment": "*",
   "entrypoints": {
