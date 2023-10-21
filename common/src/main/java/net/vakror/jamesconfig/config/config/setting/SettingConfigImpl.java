@@ -119,7 +119,6 @@ public abstract class SettingConfigImpl extends Config {
     @Override
     public List<ConfigObject> parse(JsonObject jsonObject) {
         setRequiredSettingsMap();
-        Stopwatch stopwatch = Stopwatch.createStarted();
         JamesConfigMod.LOGGER.info("Parsing config {}", this);
         List<ConfigObject> list = new ArrayList<>();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
