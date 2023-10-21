@@ -71,8 +71,10 @@ public class JamesConfigMod
 		ConfigEvents.CONFIG_REGISTER_EVENT.invoker().post(configRegisterEvent);
 		ConfigObjectRegisterEvent event = new ConfigObjectRegisterEvent();
 		ConfigEvents.OBJECT_REGISTER_EVENT.invoker().post(event);
-		KNOWN_OBJECT_TYPES.putAll(event.getKnownTypes());
-		configRegisterEvent.getConfigs().forEach((JamesConfigMod::addConfig));
+		for (ConfigObject configObject : event.getAll()) {
+			KNOWN_OBJECT_TYPES.put(configObject.getType(), configObject);
+		}
+		configRegisterEvent.getAll().forEach((config -> JamesConfigMod.addConfig(config.getName(), config)));
 		readAllConfigs(false);
 	}
 }

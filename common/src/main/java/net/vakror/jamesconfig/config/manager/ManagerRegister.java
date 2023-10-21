@@ -14,7 +14,7 @@ public class ManagerRegister extends SimpleManager<Manager<?>> {
     public static class ModEvents {
         private ModEvents(ManagerRegister manager) {
             ConfigEvents.REGISTER_MANAGER.register(event -> {
-                manager.getAll().forEach(event::addManager);
+                manager.getAll().forEach(event::register);
                 return EventResult.pass();
             });
         }

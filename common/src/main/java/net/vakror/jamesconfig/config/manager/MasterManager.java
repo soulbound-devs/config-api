@@ -13,6 +13,6 @@ public class MasterManager {
         ManagerRegister.INSTANCE.register();
         RegisterConfigManagersEvent event = new RegisterConfigManagersEvent();
         ConfigEvents.REGISTER_MANAGER.invoker().post(event);
-        return event.getManagers();
+        return event.getAll();
     }
 }
