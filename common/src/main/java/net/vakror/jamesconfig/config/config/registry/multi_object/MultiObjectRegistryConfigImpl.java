@@ -1,6 +1,5 @@
-package net.vakror.jamesconfig.config.config.registry;
+package net.vakror.jamesconfig.config.config.registry.multi_object;
 
-import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
@@ -19,7 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class RegistryConfigImpl extends Config {
+public abstract class MultiObjectRegistryConfigImpl extends Config {
 
     public final List<ConfigObject> objects = new ArrayList<>();
 

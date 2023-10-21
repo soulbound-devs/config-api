@@ -1,17 +1,19 @@
-package net.vakror.jamesconfig.config.config.registry;
+package net.vakror.jamesconfig.config.config.registry.single_object;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
+import net.vakror.jamesconfig.config.config.object.default_objects.primitive.PrimitiveObject;
 
-public abstract class SimpleRegistryConfigImpl extends RegistryConfigImpl {
+public abstract class SimpleSingleObjectRegistryConfigImpl<P extends ConfigObject> extends SingleObjectRegistryConfigImpl<P> {
 
     private final String subPath;
     private final ResourceLocation name;
     private boolean valid = true;
 
 
-    public SimpleRegistryConfigImpl(String subPath, ResourceLocation name) {
+    public SimpleSingleObjectRegistryConfigImpl(String subPath, ResourceLocation name) {
         this.subPath = subPath;
         this.name = name;
     }
@@ -79,7 +81,13 @@ public abstract class SimpleRegistryConfigImpl extends RegistryConfigImpl {
 
     @Override
     public void add(ConfigObject object) {
-        objects.add(object);
+        try {
+            if (object != null) {
+                objects.add((P) object);
+            }
+        } catch (Exception e) {
+            JamesConfigMod.LOGGER.error("Config object {} of type {} in config {} is not of correct type", object.getName(), object.getType().toString(), this.getName().toString());
+        }
     }
 
     @Override

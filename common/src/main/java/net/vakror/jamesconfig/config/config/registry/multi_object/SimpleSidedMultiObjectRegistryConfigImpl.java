@@ -1,12 +1,12 @@
-package net.vakror.jamesconfig.config.config.registry;
+package net.vakror.jamesconfig.config.config.registry.multi_object;
 
 import dev.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 
-public abstract class SimpleSidedRegistryConfigImpl extends SimpleRegistryConfigImpl {
+public abstract class SimpleSidedMultiObjectRegistryConfigImpl extends SimpleMultiObjectRegistryConfigImpl {
     private final EnvType side;
-    public SimpleSidedRegistryConfigImpl(EnvType side, String subPath, ResourceLocation name) {
+    public SimpleSidedMultiObjectRegistryConfigImpl(EnvType side, String subPath, ResourceLocation name) {
         super(subPath, name);
         this.side = side;
     }

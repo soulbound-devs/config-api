@@ -5,11 +5,11 @@ import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.BooleanPrimitiveObject;
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.StringPrimitiveObject;
 import net.vakror.jamesconfig.config.config.object.default_objects.registry.CompoundRegistryObject;
-import net.vakror.jamesconfig.config.config.registry.SimpleRegistryConfigImpl;
+import net.vakror.jamesconfig.config.config.registry.multi_object.SimpleMultiObjectRegistryConfigImpl;
 
-public class ExampleRegistryConfigImpl extends SimpleRegistryConfigImpl {
+public class ExampleMultiObjectRegistryConfigImpl extends SimpleMultiObjectRegistryConfigImpl {
     public static final ResourceLocation NAME = new ResourceLocation(JamesConfigMod.MOD_ID, "exampleconfig");
-    public ExampleRegistryConfigImpl() {
+    public ExampleMultiObjectRegistryConfigImpl() {
         super("example/config", NAME);
     }
 

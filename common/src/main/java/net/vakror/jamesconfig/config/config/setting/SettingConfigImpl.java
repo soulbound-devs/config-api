@@ -86,10 +86,8 @@ public abstract class SettingConfigImpl extends Config {
                         try (FileReader reader = new FileReader(file)) {
                             JsonObject jsonObject = (JsonObject) new JsonParser().parse(reader);
                             List<ConfigObject> configObjects = parse(jsonObject);
-                            Stopwatch stopwatch1 = Stopwatch.createStarted();
                             JamesConfigMod.LOGGER.info("Setting values in config {} to parsed value", this);
                             for (ConfigObject object : configObjects) {
-                                Stopwatch stopwatch2 = Stopwatch.createStarted();
                                 JamesConfigMod.LOGGER.info("Setting value {} to parsed value in setting config {}", object.getName(), this);
                                 setValue(object.getName(), object);
                                 JamesConfigMod.LOGGER.info("Finished setting value {} to parsed value", object.getName());
