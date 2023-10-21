@@ -25,7 +25,6 @@ public abstract class RegistryConfigImpl extends Config {
 
     @Override
     public void generateConfig() {
-        this.resetToDefault();
         this.writeConfig();
     }
 
@@ -72,13 +71,11 @@ public abstract class RegistryConfigImpl extends Config {
     public void readConfig(boolean overrideCurrent, boolean shouldCallAgain) {
         if (shouldReadConfig()) {
             if (!overrideCurrent) {
-                Stopwatch stopwatch = Stopwatch.createStarted();
                 JamesConfigMod.LOGGER.info("Reading configs: " + this.getName());
                 File[] configFiles = this.getConfigDir().listFiles(File::isFile);
                 if (configFiles != null && configFiles.length != 0) {
                     for (File file : configFiles) {
                         try (FileReader reader = new FileReader(file)) {
-                            Stopwatch stopwatch1 = Stopwatch.createStarted();
                             JamesConfigMod.LOGGER.info("Reading config object {} for config {}", this, file.getName());
                             JsonObject jsonObject = (JsonObject) new JsonParser().parse(reader);
                             currentFile = file;
@@ -90,7 +87,7 @@ public abstract class RegistryConfigImpl extends Config {
                                     }
                                 }
                             }
-                            JamesConfigMod.LOGGER.info("Finished reading config object {}, \033[0;31mTook {}\033[0;0m", file.getName(),stopwatch1);
+                            JamesConfigMod.LOGGER.info("Finished reading config object {}", file.getName());
                         } catch (IOException e) {
                             System.out.println(e.getClass());
                             e.printStackTrace();
@@ -111,7 +108,7 @@ public abstract class RegistryConfigImpl extends Config {
                     }
                     JamesConfigMod.LOGGER.warn("Config " + this.getName() + "not found, generating new");
                 }
-                JamesConfigMod.LOGGER.info("Finished reading config, \033[0;31mTook {}\033[0;0m", stopwatch);
+                JamesConfigMod.LOGGER.info("Finished reading config");
             } else {
                 this.generateConfig();
                 if (shouldCallAgain) {
@@ -132,7 +129,7 @@ public abstract class RegistryConfigImpl extends Config {
         if (!jsonObject.has("type") || !jsonObject.get("type").isJsonPrimitive() || !jsonObject.getAsJsonPrimitive("type").isString()) {
             JamesConfigMod.LOGGER.error("Config object {} either does not contain a type field, or the type field is not a string", currentFile.getName());
         } else {
-            ConfigObject object = ConfigObject.deserializeUnknown(jsonObject);
+            ConfigObject object = ConfigObject.deserializeUnknown(jsonObject, this.toString());
             if (object != null) {
                 if (shouldAddObject(object)) {
                     if (this.isValueAcceptable(object)) {
@@ -162,19 +159,18 @@ public abstract class RegistryConfigImpl extends Config {
     public abstract boolean shouldAddObject(ConfigObject object);
 
     protected abstract void resetToDefault();
+
     @Override
     public void writeConfig() {
         Stopwatch stopwatch = Stopwatch.createStarted();
         JamesConfigMod.LOGGER.info("Writing config {}", this);
         File cfgDir = this.getConfigDir();
         if (!cfgDir.exists()) {
-            Stopwatch stopwatch1 = Stopwatch.createStarted();
-            JamesConfigMod.LOGGER.info("Attempting to create config directory {}", cfgDir.getPath());
             if (!cfgDir.mkdirs()) {
-                JamesConfigMod.LOGGER.error("Failed to create config directory {}, \033[0;31mTook {}\033[0;0m", cfgDir.getPath(), stopwatch1);
+                JamesConfigMod.LOGGER.error("Failed to create config directory {}", cfgDir.getPath());
                 return;
             }
-            JamesConfigMod.LOGGER.info("Finished creating config directory {}, \033[0;31mTook {}\033[0;0m", cfgDir.getPath(), stopwatch1);
+            JamesConfigMod.LOGGER.info("Finished creating config directory {}", cfgDir.getPath());
         }
         for (ConfigObject object: getAll()) {
             Stopwatch stopwatch1 = Stopwatch.createStarted();
@@ -191,13 +187,13 @@ public abstract class RegistryConfigImpl extends Config {
                     Streams.write(object.serialize(), jsonWriter);
                     writer.flush();
                 }
-                JamesConfigMod.LOGGER.info("Successfully wrote config object {} for config {}, \033[0;31mTook {}\033[0;0m", object.getName(), this, stopwatch1);
+                JamesConfigMod.LOGGER.info("Successfully wrote config object {} for config {}", object.getName(), this);
             } catch (IOException e) {
-                JamesConfigMod.LOGGER.error("Failed to write config object {} for config {}, \033[0;31mTook {}\033[0;0m", object.getName(), this, stopwatch1);
+                JamesConfigMod.LOGGER.error("Failed to write config object {} for config {}", object.getName(), this);
                 e.printStackTrace();
             }
         }
-        JamesConfigMod.LOGGER.info("Finished writing config, \033[0;31mTook {}\033[0;0m", stopwatch);
+        JamesConfigMod.LOGGER.info("Finished writing config");
     }
 
     @Override
@@ -209,13 +205,13 @@ public abstract class RegistryConfigImpl extends Config {
             Stopwatch stopwatch1 = Stopwatch.createStarted();
             JamesConfigMod.LOGGER.info("Writing config object {} in config {} to network", object.getName(), this);
             if (!(object.serialize() instanceof JsonObject)) {
-                JamesConfigMod.LOGGER.error("Config object {} in config {} does not have a json object at root, skipping write, \033[0;31mTook {}\033[0;0m", object.getName(), this, stopwatch1);
+                JamesConfigMod.LOGGER.error("Config object {} in config {} does not have a json object at root, skipping write", object.getName(), this);
             } else {
                 jsonObject.add((JsonObject) object.serialize());
-                JamesConfigMod.LOGGER.info("Finished writing config object {} in config {} to network, \033[0;31mTook {}\033[0;0m", object.getName(), this, stopwatch1);
+                JamesConfigMod.LOGGER.info("Finished writing config object {} in config {} to network", object.getName(), this);
             }
         }
-        JamesConfigMod.LOGGER.info("Finished writing config {} to network, \033[0;31mTook {}\033[0;0m", this, stopwatch);
+        JamesConfigMod.LOGGER.info("Finished writing config {} to network", this);
         return jsonObject;
     }
 }

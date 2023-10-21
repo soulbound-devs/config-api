@@ -92,9 +92,9 @@ public abstract class SettingConfigImpl extends Config {
                                 Stopwatch stopwatch2 = Stopwatch.createStarted();
                                 JamesConfigMod.LOGGER.info("Setting value {} to parsed value in setting config {}", object.getName(), this);
                                 setValue(object.getName(), object);
-                                JamesConfigMod.LOGGER.info("Finished setting value {} to parsed value, \033[0;31mTook {}\033[0;0m", object.getName(), stopwatch2);
+                                JamesConfigMod.LOGGER.info("Finished setting value {} to parsed value", object.getName());
                             }
-                            JamesConfigMod.LOGGER.info("Finished setting values in config {} to parsed value, \033[0;31mTook {}\033[0;0m", this, stopwatch1);
+                            JamesConfigMod.LOGGER.info("Finished setting values in config {} to parsed value", this);
                         } catch (IOException e) {
                             System.out.println(e.getClass());
                             e.printStackTrace();
@@ -108,7 +108,7 @@ public abstract class SettingConfigImpl extends Config {
                 } catch (JsonIOException | JsonSyntaxException e) {
                     throw new IllegalStateException(e);
                 }
-                JamesConfigMod.LOGGER.info("Finished reading config, \033[0;31mTook {}\033[0;0m", stopwatch);
+                JamesConfigMod.LOGGER.info("Finished reading config");
             } else {
                 this.generateConfig();
                 JamesConfigMod.LOGGER.info("Successfully Overwrote config {}", this);
@@ -129,25 +129,16 @@ public abstract class SettingConfigImpl extends Config {
             } else {
                 ConfigObject object = requiredSettingsMap.get(key);
                 try {
-                    if (object instanceof SettingConfigObject settingConfigObject) {
-                        if (!entry.getValue().isJsonObject()) {
-                            JamesConfigMod.LOGGER.error("Config setting definition {} in config {} is not json object", key, getName());
-                        }
-                        ConfigObject object1 = settingConfigObject.deserializeSettingValues(key, (JsonObject) entry.getValue(), getName().toString());
-                        object1.setName(key);
-                        list.add(object1);
-                    } else if (object != null) {
-                        ConfigObject object1 = object.deserialize(key, entry.getValue(), this.requiredSettingsMap.get(key));
-                        object1.setName(key);
-                        list.add(object1);
-                    }
+                    ConfigObject object1 = object.deserialize(key, entry.getValue(), requiredSettingsMap.get(key), getName().toString());
+                    object1.setName(key);
+                    list.add(object1);
                 } catch (Exception e) {
                     JamesConfigMod.LOGGER.error("Error reading config object {}, skipping. Make sure it is the right type.", key);
                     e.printStackTrace();
                 }
             }
         }
-        JamesConfigMod.LOGGER.info("Finished parsing config, \033[0;31mTook {}\033[0;0m", stopwatch);
+        JamesConfigMod.LOGGER.info("Finished parsing config");
         return list;
     }
 
@@ -179,7 +170,7 @@ public abstract class SettingConfigImpl extends Config {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        JamesConfigMod.LOGGER.info("Finished writing config, \033[0;31mTook {}\033[0;0m", stopwatch);
+        JamesConfigMod.LOGGER.info("Finished writing config");
     }
 
     public List<JsonObject> serialize() {

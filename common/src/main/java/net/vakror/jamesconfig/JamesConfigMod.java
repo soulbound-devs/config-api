@@ -66,7 +66,7 @@ public class JamesConfigMod
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		LOGGER.info("Reading All Configs");
 		CONFIGS.forEach((name, register) -> register.readConfig(replace));
-		LOGGER.info("Finished reading all configs, \033[0;31mTook {}\033[0;0m", stopwatch);
+		LOGGER.info("Finished reading all configs");
 	}
 
 	public static void addConfig(ResourceLocation name, Config register) {

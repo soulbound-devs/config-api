@@ -47,12 +47,13 @@ public abstract class PrimitiveObject<P> implements ConfigObject {
      * @param name the name of the primitive object
      * @param element the {@link JsonPrimitive} that contains the primitive
      * @param defaultValue the default value – used if the element is invalid or the wrong type to reset the value of the primitive to default
+     * @param configName the name of the config that contains this object
      * @return a primitive object representing the deserialized value
      */
     @Override
-    public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue) {
+    public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue, String configName) {
         this.name = name;
-        PrimitiveObject<?> object = ConfigObject.deserializePrimitive(name, (JsonPrimitive) element);
+        PrimitiveObject<?> object = ConfigObject.deserializePrimitive(name, (JsonPrimitive) element, configName);
         if (object == null || !object.getClass().equals(this.getClass())) {
             return defaultValue;
         }

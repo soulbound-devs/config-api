@@ -67,16 +67,17 @@ public class CompoundRegistryObject extends RegistryConfigObject {
      * @param name the name of the compound
      * @param element the {@link JsonElement} to deserialize from
      * @param defaultValue the default value – used if the element is invalid or the wrong type to reset the value of the primitive to default, null if called from a registry config
+     * @param configName the name of the config containing this value
      * @return the deserialized form of the compound
      */
     @Override
-    public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue) {
+    public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue, String configName) {
         JsonObject object = (JsonObject) element;
         CompoundRegistryObject compoundObject = new CompoundRegistryObject(name);
 
         for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
             String key = entry.getKey();
-            ConfigObject configObject = ConfigObject.deserializeUnknown(key, object.get(key));
+            ConfigObject configObject = ConfigObject.deserializeUnknown(key, object.get(key), this.getName());
             if (configObject != null) {
                 compoundObject.addObject(configObject);
             }

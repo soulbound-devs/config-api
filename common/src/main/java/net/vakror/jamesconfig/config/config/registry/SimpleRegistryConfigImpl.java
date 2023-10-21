@@ -47,7 +47,7 @@ public abstract class SimpleRegistryConfigImpl extends RegistryConfigImpl {
         Stopwatch stopwatch = Stopwatch.createStarted();
         JamesConfigMod.LOGGER.info("Clearing config");
         objects.clear();
-        JamesConfigMod.LOGGER.info("Finished Clearing config, \033[0;31mTook {}\033[0;0m", stopwatch);
+        JamesConfigMod.LOGGER.info("Finished Clearing config");
     }
 
     @Override

@@ -16,31 +16,31 @@ public interface ConfigObject {
     void setName(String name);
     ResourceLocation getType();
     JsonElement serialize();
-    ConfigObject deserialize(@Nullable String name, JsonElement element, ConfigObject defaultValue);
+    ConfigObject deserialize(@Nullable String name, JsonElement element, ConfigObject defaultValue, String configName);
 
     @Nullable
-    static ConfigObject deserializeUnknown(JsonElement element) {
+    static ConfigObject deserializeUnknown(JsonElement element, String configName) {
         if (element instanceof JsonObject object) {
-            return deserializeFromObject(null, object);
+            return deserializeFromObject(null, object, configName);
         } else if (element instanceof JsonPrimitive primitive) {
-            return deserializePrimitive(null, primitive);
+            return deserializePrimitive(null, primitive, configName);
         } else {
             return null;
         }
     }
 
     @Nullable
-    static ConfigObject deserializeUnknown(String name, JsonElement element) {
+    static ConfigObject deserializeUnknown(String name, JsonElement element, String configName) {
         if (element instanceof JsonObject object) {
-            return deserializeFromObject(name, object);
+            return deserializeFromObject(name, object, configName);
         } else if (element instanceof JsonPrimitive primitive) {
-            return deserializePrimitive(name, primitive);
+            return deserializePrimitive(name, primitive, configName);
         } else {
             return null;
         }
     }
 
-    static PrimitiveObject<?> deserializePrimitive(String name, JsonPrimitive element) {
+    static PrimitiveObject<?> deserializePrimitive(String name, JsonPrimitive element, String configName) {
         if (element.isNumber()) {
             Number number = element.getAsNumber();
             return new NumberPrimitiveObject(number, name);
@@ -52,12 +52,12 @@ public interface ConfigObject {
         return null;
     }
 
-    private static ConfigObject deserializeFromObject(String name, JsonObject jsonObject) {
+    private static ConfigObject deserializeFromObject(String name, JsonObject jsonObject, String configName) {
         ConfigObject object = JamesConfigMod.KNOWN_OBJECT_TYPES.get(new ResourceLocation(jsonObject.getAsJsonPrimitive("type").getAsString()));
         if (object == null) {
             JamesConfigMod.LOGGER.error("Could not find config object object of type {}", jsonObject.getAsJsonPrimitive("type").getAsString());
             return null;
         }
-        return object.deserialize(name, jsonObject, null);
+        return object.deserialize(name, jsonObject, null, configName);
     }
 }
