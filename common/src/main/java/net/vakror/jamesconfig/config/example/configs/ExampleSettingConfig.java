@@ -30,7 +30,7 @@ public class ExampleSettingConfig extends SimpleSettingConfigImpl {
 
         @Override
         public List<ConfigObject> getRequiredSettings() {
-            return List.of(new StringPrimitiveObject("", "all the files in this directory will not be loaded"));
+            return List.of(new StringPrimitiveObject("all the files in this directory will not be loaded", ""));
         }
 
         @Override
