@@ -53,7 +53,7 @@ public abstract class PrimitiveObject<P> implements ConfigObject {
     @Override
     public ConfigObject deserialize(String name, JsonElement element, ConfigObject defaultValue, String configName) {
         this.name = name;
-        PrimitiveObject<?> object = ConfigObject.deserializePrimitive(name, (JsonPrimitive) element, configName);
+        PrimitiveObject<?> object = ConfigObject.deserializePrimitive(name, (JsonPrimitive) element);
         if (object == null || !object.getClass().equals(this.getClass())) {
             return defaultValue;
         }

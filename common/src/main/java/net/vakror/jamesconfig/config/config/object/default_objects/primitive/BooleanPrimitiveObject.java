@@ -11,7 +11,7 @@ public class BooleanPrimitiveObject extends PrimitiveObject<Boolean> {
      * @param content the value of the primitive
      * @param name the name of the primitive
      */
-    public BooleanPrimitiveObject(Boolean content, String name) {
+    public BooleanPrimitiveObject(String name, Boolean content) {
         super(content, name);
     }
 

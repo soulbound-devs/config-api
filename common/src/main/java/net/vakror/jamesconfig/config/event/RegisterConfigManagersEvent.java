@@ -9,7 +9,6 @@ import java.util.List;
 public class RegisterConfigManagersEvent {
     private final List<Manager<?>> managers = new ArrayList<>();
 
-
     public void addManager(Manager<?> type) {
         managers.add(type);
     }

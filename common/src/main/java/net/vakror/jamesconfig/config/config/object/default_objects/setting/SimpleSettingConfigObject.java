@@ -78,7 +78,7 @@ public abstract class SimpleSettingConfigObject implements SettingConfigObject {
      * @param value the value to set the setting to
      */
     @Override
-    public void setValue(String name, ConfigObject value) {
+    public SettingConfigObject setValue(String name, ConfigObject value) {
         this.setRequiredSettingsMap();
         if (value.getName() == null || value.getName().isBlank()) {
             value.setName(name);
@@ -88,6 +88,7 @@ public abstract class SimpleSettingConfigObject implements SettingConfigObject {
         } else {
             values.put(name, value);
         }
+        return this;
     }
 
     @Override

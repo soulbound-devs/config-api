@@ -9,26 +9,21 @@ import net.vakror.jamesconfig.config.config.object.default_objects.primitive.Str
 import net.vakror.jamesconfig.config.config.object.default_objects.setting.SimpleSettingConfigObject;
 import net.vakror.jamesconfig.config.config.setting.SimpleSettingConfigImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ExampleSettingConfig extends SimpleSettingConfigImpl {
     public ExampleSettingConfig() {
-        super("example/config/setting", new ResourceLocation(JamesConfigMod.MOD_ID, "setting"), "settingTest");
+        super("example/config/setting", new ResourceLocation(JamesConfigMod.MOD_ID, "setting"));
     }
 
     @Override
     public List<ConfigObject> getRequiredSettings() {
-        List<ConfigObject> list = new ArrayList<>();
-        TestSettingObject object = new TestSettingObject("this is a setting config");
-        object.setValue("all the files in this directory will not be loaded", new StringPrimitiveObject("into the config, only this one will with exactly these options"));
-        list.add(object);
-        list.add(new BooleanPrimitiveObject(true, "doesThisWork"));
-        return list;
+        return List.of(
+                new TestSettingObject("this is a setting config").setValue("all the files in this directory will not be loaded",
+                        new StringPrimitiveObject("into the config, only this one will with exactly these options")), new BooleanPrimitiveObject("doesThisWork", true));
     }
 
     public static class TestSettingObject extends SimpleSettingConfigObject {
-
         public TestSettingObject(String name) {
             super(name);
         }

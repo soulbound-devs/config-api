@@ -11,7 +11,7 @@ public class StringPrimitiveObject extends PrimitiveObject<String> {
      * @param content the value of the primitive
      * @param name the name of the primitive
      */
-    public StringPrimitiveObject(String content, String name) {
+    public StringPrimitiveObject(String name, String content) {
         super(content, name);
     }
 

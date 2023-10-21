@@ -13,7 +13,7 @@ public class NumberPrimitiveObject extends PrimitiveObject<Number> {
      * @param content the value of the primitive
      * @param name the name of the primitive
      */
-    public NumberPrimitiveObject(Number content, String name) {
+    public NumberPrimitiveObject(String name, Number content) {
         super(content, name);
     }
 

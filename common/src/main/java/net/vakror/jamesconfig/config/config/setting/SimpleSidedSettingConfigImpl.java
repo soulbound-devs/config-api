@@ -6,8 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public abstract class SimpleSidedSettingConfigImpl extends SimpleSettingConfigImpl {
     private final EnvType side;
-    public SimpleSidedSettingConfigImpl(EnvType side, String subPath, ResourceLocation name, String fileName) {
-        super(subPath, name, fileName);
+    public SimpleSidedSettingConfigImpl(EnvType side, String subPath, ResourceLocation name) {
+        super(subPath, name);
         this.side = side;
     }
 

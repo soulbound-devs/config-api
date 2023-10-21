@@ -19,10 +19,10 @@ public abstract class SimpleSettingConfigImpl extends SettingConfigImpl {
 
     public final Map<String, ConfigObject> values = new HashMap<>(getRequiredSettings().size());
 
-    public SimpleSettingConfigImpl(String subPath, ResourceLocation name, String fileName) {
+    public SimpleSettingConfigImpl(String subPath, ResourceLocation name) {
         this.subPath = subPath;
         this.name = name;
-        this.fileName = fileName;
+        this.fileName = name.getPath();
     }
 
     @Override

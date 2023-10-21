@@ -19,7 +19,7 @@ public class ExampleRegistryConfigImpl extends SimpleRegistryConfigImpl {
         CompoundRegistryObject object = new CompoundRegistryObject("this is a registry config");
         object.addObject(new StringPrimitiveObject("will be loaded into the config", "all of these entries"));
         test.addObject(object);
-        test.addObject(new BooleanPrimitiveObject(true, "doesThisWork"));
+        test.addObject(new BooleanPrimitiveObject("doesThisWork", true));
         add(test);
     }
 }

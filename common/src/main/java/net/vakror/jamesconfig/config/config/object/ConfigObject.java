@@ -23,7 +23,7 @@ public interface ConfigObject {
         if (element instanceof JsonObject object) {
             return deserializeFromObject(null, object, configName);
         } else if (element instanceof JsonPrimitive primitive) {
-            return deserializePrimitive(null, primitive, configName);
+            return deserializePrimitive(null, primitive);
         } else {
             return null;
         }
@@ -34,20 +34,19 @@ public interface ConfigObject {
         if (element instanceof JsonObject object) {
             return deserializeFromObject(name, object, configName);
         } else if (element instanceof JsonPrimitive primitive) {
-            return deserializePrimitive(name, primitive, configName);
+            return deserializePrimitive(name, primitive);
         } else {
             return null;
         }
     }
 
-    static PrimitiveObject<?> deserializePrimitive(String name, JsonPrimitive element, String configName) {
+    static PrimitiveObject<?> deserializePrimitive(String name, JsonPrimitive element) {
         if (element.isNumber()) {
-            Number number = element.getAsNumber();
-            return new NumberPrimitiveObject(number, name);
+            return new NumberPrimitiveObject(name, element.getAsNumber());
         } else if (element.isString()) {
-            return new StringPrimitiveObject(element.getAsString(), name);
+            return new StringPrimitiveObject(name, element.getAsString());
         } else if (element.isBoolean()) {
-            return new BooleanPrimitiveObject(element.getAsBoolean(), name);
+            return new BooleanPrimitiveObject(name, element.getAsBoolean());
         }
         return null;
     }

@@ -18,7 +18,7 @@ public interface SettingConfigObject extends ConfigObject {
      * @param name  the name of the setting to set a value to (in case the config's name is null)
      * @param value the value to set the setting to
      */
-    void setValue(String name, ConfigObject value);
+    SettingConfigObject setValue(String name, ConfigObject value);
 
     /**
      * Queries a {@link Map}<{@link String}, {@link ConfigObject}>, where {@link String} is the name of the setting, and {@link ConfigObject} is the value of the setting

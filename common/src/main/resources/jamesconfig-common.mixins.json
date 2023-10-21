@@ -4,7 +4,6 @@
   "package": "net.vakror.jamesconfig.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "JsonPrimitiveAccessor"
   ],
   "client": [
   ],

@@ -1,6 +1,5 @@
 package net.vakror.jamesconfig;
 
-import com.google.common.base.Stopwatch;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
@@ -12,7 +11,9 @@ import net.vakror.jamesconfig.config.event.ConfigEvents;
 import net.vakror.jamesconfig.config.event.ConfigObjectRegisterEvent;
 import net.vakror.jamesconfig.config.event.ConfigRegisterEvent;
 import net.vakror.jamesconfig.config.example.ExampleConfigs;
+import net.vakror.jamesconfig.config.manager.ManagerRegister;
 import net.vakror.jamesconfig.config.manager.MasterManager;
+import net.vakror.jamesconfig.config.manager.config.ConfigManager;
 import net.vakror.jamesconfig.config.manager.config.SimpleConfigManager;
 import net.vakror.jamesconfig.config.manager.object.SimpleConfigObjectManager;
 import net.vakror.jamesconfig.config.packet.ArchModPackets;
@@ -37,20 +38,17 @@ public class JamesConfigMod
 
 	public JamesConfigMod()
 	{
-		ConfigEvents.REGISTER_MANAGER.register(event -> {
-			event.addManager(SimpleConfigManager.INSTANCE);
-			event.addManager(SimpleConfigObjectManager.INSTANCE);
-			return EventResult.pass();
-		});
 
 		PlayerEvent.PLAYER_JOIN.register(ArchModPackets::onLogIn);
 		PlayerEvent.CHANGE_DIMENSION.register(((player, oldLevel, newLevel) -> {
 
 		}));
-		//MinecraftForge.EVENT_BUS.addListener(net.vakror.jamesconfig.config.example.Events.ForgeEvents::onGetConfigTypeAdapters);
 
-		//Call this in mod constructor or anywhere before commonsetup fires
+		//Call this in mod constructor or anywhere before common setup fires
 		ExampleConfigs.addExampleConfig();
+
+		ManagerRegister.INSTANCE.register(SimpleConfigManager.INSTANCE);
+		ManagerRegister.INSTANCE.register(SimpleConfigObjectManager.INSTANCE);
 
 		MasterManager.register();
 
@@ -58,12 +56,7 @@ public class JamesConfigMod
 		ClientLifecycleEvent.CLIENT_SETUP.register((minecraft)-> ArchModPackets.register());
 	}
 
-	public static void registerConfig(ResourceLocation config, boolean replace) {
-		CONFIGS.get(config).readConfig(replace);
-	}
-
-	public static void registerAllConfigs(boolean replace) {
-		Stopwatch stopwatch = Stopwatch.createStarted();
+	public static void readAllConfigs(boolean replace) {
 		LOGGER.info("Reading All Configs");
 		CONFIGS.forEach((name, register) -> register.readConfig(replace));
 		LOGGER.info("Finished reading all configs");
@@ -80,6 +73,6 @@ public class JamesConfigMod
 		ConfigEvents.OBJECT_REGISTER_EVENT.invoker().post(event);
 		KNOWN_OBJECT_TYPES.putAll(event.getKnownTypes());
 		configRegisterEvent.getConfigs().forEach((JamesConfigMod::addConfig));
-		registerAllConfigs(false);
+		readAllConfigs(false);
 	}
 }
