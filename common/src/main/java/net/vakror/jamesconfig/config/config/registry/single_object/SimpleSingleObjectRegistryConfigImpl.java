@@ -1,21 +1,30 @@
 package net.vakror.jamesconfig.config.config.registry.single_object;
 
-import com.mojang.serialization.Codec;
+import dev.architectury.platform.Platform;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
-import net.vakror.jamesconfig.config.config.object.default_objects.primitive.PrimitiveObject;
 
 public abstract class SimpleSingleObjectRegistryConfigImpl<P extends ConfigObject> extends SingleObjectRegistryConfigImpl<P> {
 
     private final String subPath;
     private final ResourceLocation name;
     private boolean valid = true;
+    private final String[] requiredMods;
 
 
     public SimpleSingleObjectRegistryConfigImpl(String subPath, ResourceLocation name) {
         this.subPath = subPath;
         this.name = name;
+        requiredMods = new String[0];
+    }
+
+
+    public SimpleSingleObjectRegistryConfigImpl(String subPath, ResourceLocation name, String... requiredMods) {
+        this.subPath = subPath;
+        this.name = name;
+        this.requiredMods = requiredMods;
     }
 
     @Override
@@ -54,12 +63,7 @@ public abstract class SimpleSingleObjectRegistryConfigImpl<P extends ConfigObjec
     public void discardValue(ConfigObject object) {
         objects.remove(object);
     }
-
-    @Override
-    public boolean shouldReadConfig() {
-        return true;
-    }
-
+    
     @Override
     public boolean shouldAddObject(ConfigObject object) {
         return true;
@@ -91,7 +95,17 @@ public abstract class SimpleSingleObjectRegistryConfigImpl<P extends ConfigObjec
     }
 
     @Override
-    public boolean shouldSync() {
+    public final boolean shouldReadConfig() {
+        for (String requiredMod : requiredMods) {
+            if (!Platform.isModLoaded(requiredMod)) {
+                JamesConfigMod.LOGGER.error("Mod \"" + requiredMod + "\" is not present but required by config \"" + this + "\", skipping read");
+                return false;
+            }
+        }
+        return shouldLoad();
+    }
+
+    public boolean shouldLoad() {
         return true;
     }
 }

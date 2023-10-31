@@ -3,6 +3,7 @@ package net.vakror.jamesconfig.config.config.registry.single_object;
 import dev.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
 public abstract class SimpleSidedSingleObjectRegistryConfigImpl<P extends ConfigObject> extends SimpleSingleObjectRegistryConfigImpl<P> {
@@ -23,7 +24,7 @@ public abstract class SimpleSidedSingleObjectRegistryConfigImpl<P extends Config
     }
 
     @Override
-    public boolean shouldReadConfig() {
+    public boolean shouldLoad() {
         if (side == null) {
             return true;
         }

@@ -7,15 +7,15 @@ import net.vakror.jamesconfig.config.config.object.default_objects.StringWithCon
 import net.vakror.jamesconfig.config.config.object.default_objects.primitive.StringPrimitiveObject;
 import net.vakror.jamesconfig.config.config.registry.single_object.SimpleSingleObjectRegistryConfigImpl;
 
-public class ExampleSingleObjectRegistryConfigImpl extends SimpleSingleObjectRegistryConfigImpl<StringPrimitiveObject> {
+public class ExampleSingleObjectRegistryConfigImpl extends SimpleSingleObjectRegistryConfigImpl<StringWithContents> {
     public static final ResourceLocation NAME = new ResourceLocation(JamesConfigMod.MOD_ID, "exampleconfigone");
     public ExampleSingleObjectRegistryConfigImpl() {
         super("example/test", NAME);
     }
 
     @Override
-    public StringPrimitiveObject decode(JsonObject object) {
-        return (StringPrimitiveObject) new StringPrimitiveObject("", "").deserialize("", object, null, this.getName().toString());
+    public StringWithContents decode(JsonObject object) {
+        return (StringWithContents) new StringWithContents("", "").deserialize("", object, null, this.getName().toString());
     }
 
     @Override

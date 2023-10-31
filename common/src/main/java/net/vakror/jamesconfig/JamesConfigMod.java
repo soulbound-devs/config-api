@@ -1,19 +1,19 @@
 package net.vakror.jamesconfig;
 
-import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.config.config.Config;
+import net.vakror.jamesconfig.config.config.commands.JamesConfigCommands;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 import net.vakror.jamesconfig.config.event.ConfigEvents;
 import net.vakror.jamesconfig.config.event.ConfigObjectRegisterEvent;
 import net.vakror.jamesconfig.config.event.ConfigRegisterEvent;
 import net.vakror.jamesconfig.config.example.ExampleConfigs;
+import net.vakror.jamesconfig.config.manager.CommandManager;
 import net.vakror.jamesconfig.config.manager.ManagerRegister;
 import net.vakror.jamesconfig.config.manager.MasterManager;
-import net.vakror.jamesconfig.config.manager.config.ConfigManager;
 import net.vakror.jamesconfig.config.manager.config.SimpleConfigManager;
 import net.vakror.jamesconfig.config.manager.object.SimpleConfigObjectManager;
 import net.vakror.jamesconfig.config.packet.ArchModPackets;
@@ -47,23 +47,30 @@ public class JamesConfigMod
 		//Call this in mod constructor or anywhere before common setup fires
 		ExampleConfigs.addExampleConfig();
 
+		ManagerRegister.INSTANCE.register(CommandManager.INSTANCE);
 		ManagerRegister.INSTANCE.register(SimpleConfigManager.INSTANCE);
 		ManagerRegister.INSTANCE.register(SimpleConfigObjectManager.INSTANCE);
 
 		MasterManager.register();
 
+		JamesConfigCommands.registerCommands();
+
 		LifecycleEvent.SETUP.register(this::commonSetup);
 		ClientLifecycleEvent.CLIENT_SETUP.register((minecraft)-> ArchModPackets.register());
 	}
 
-	public static void readAllConfigs(boolean replace) {
+	public static void readAllConfigs() {
 		LOGGER.info("Reading All Configs");
-		CONFIGS.forEach((name, register) -> register.readConfig(replace));
+		CONFIGS.forEach((name, register) -> register.readConfig(false));
 		LOGGER.info("Finished reading all configs");
 	}
 
 	public static void addConfig(ResourceLocation name, Config register) {
 		CONFIGS.put(name, register);
+	}
+
+	public static void analyzePerformance() {
+		CONFIGS.values().forEach(Config::analyzeConfigPerformance);
 	}
 
 	private void commonSetup() {
@@ -75,6 +82,6 @@ public class JamesConfigMod
 			KNOWN_OBJECT_TYPES.put(configObject.getType(), configObject);
 		}
 		configRegisterEvent.getAll().forEach((config -> JamesConfigMod.addConfig(config.getName(), config)));
-		readAllConfigs(false);
+		readAllConfigs();
 	}
 }

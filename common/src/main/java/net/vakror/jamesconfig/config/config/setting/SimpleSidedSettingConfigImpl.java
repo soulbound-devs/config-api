@@ -3,6 +3,7 @@ package net.vakror.jamesconfig.config.config.setting;
 import dev.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
 public abstract class SimpleSidedSettingConfigImpl extends SimpleSettingConfigImpl {
     private final EnvType side;
@@ -22,7 +23,7 @@ public abstract class SimpleSidedSettingConfigImpl extends SimpleSettingConfigIm
     }
 
     @Override
-    public boolean shouldReadConfig() {
+    public boolean shouldLoad() {
         if (side == null) {
             return true;
         }

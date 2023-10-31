@@ -1,12 +1,11 @@
 package net.vakror.jamesconfig.config.config.registry.single_object;
 
+import com.google.common.base.Stopwatch;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import dev.architectury.platform.Platform;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
@@ -19,14 +18,16 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class SingleObjectRegistryConfigImpl<P extends ConfigObject> extends Config {
 
     public final List<P> objects = new ArrayList<>();
 
     @Override
-    public void generateConfig() {
+    public void generateDefaultConfig() {
         this.clear();
         this.resetToDefault();
         this.writeConfig();
@@ -71,9 +72,11 @@ public abstract class SingleObjectRegistryConfigImpl<P extends ConfigObject> ext
 
     public abstract boolean isValid();
 
-    private File currentFile = null;
+    public Stopwatch loadTime;
+    public Map<String, Stopwatch> parseTime = new HashMap<>();
 
     public void readConfig(boolean overrideCurrent, boolean shouldCallAgain) {
+        Stopwatch stopwatch1 = Stopwatch.createStarted();
         if (shouldReadConfig()) {
             if (!overrideCurrent) {
                 JamesConfigMod.LOGGER.info("Reading configs: " + this.getName());
@@ -81,30 +84,31 @@ public abstract class SingleObjectRegistryConfigImpl<P extends ConfigObject> ext
                 if (configFiles != null && configFiles.length != 0) {
                     for (File file : configFiles) {
                         try (FileReader reader = new FileReader(file)) {
+                            Stopwatch stopwatch = Stopwatch.createStarted();
                             JamesConfigMod.LOGGER.info("Reading config object {} for config {}", this, file.getName());
                             JsonObject jsonObject = (JsonObject) new JsonParser().parse(reader);
-                            currentFile = file;
                             List<P> configObjects = parse(jsonObject).stream().map((object -> (P) object)).toList();
                             for (ConfigObject object : configObjects) {
                                 if (object != null) {
                                     add(object);
                                 }
                             }
+                            stopwatch.stop();
+                            parseTime.put(file.getName(), stopwatch);
                             JamesConfigMod.LOGGER.info("Finished reading config object {}", file.getName());
                         } catch (Exception e) {
                             System.out.println(e.getClass());
                             e.printStackTrace();
                             JamesConfigMod.LOGGER.warn("Error with object {} in config {}, generating new", file.getName(), this);
-                            this.generateConfig();
+                            this.generateDefaultConfig();
                             if (shouldCallAgain) {
                                 this.objects.clear();
                                 readConfig(false, false);
                             }
                         }
                     }
-                    currentFile = null;
                 } else {
-                    this.generateConfig();
+                    this.generateDefaultConfig();
                     if (shouldCallAgain) {
                         this.objects.clear();
                         readConfig(false, false);
@@ -113,7 +117,7 @@ public abstract class SingleObjectRegistryConfigImpl<P extends ConfigObject> ext
                 }
                 JamesConfigMod.LOGGER.info("Finished reading config");
             } else {
-                this.generateConfig();
+                this.generateDefaultConfig();
                 if (shouldCallAgain) {
                     this.objects.clear();
                     readConfig(false, false);
@@ -125,6 +129,8 @@ public abstract class SingleObjectRegistryConfigImpl<P extends ConfigObject> ext
                 this.clear();
             }
         }
+        stopwatch1.stop();
+        loadTime = stopwatch1;
     }
 
     public abstract P decode(JsonObject object);

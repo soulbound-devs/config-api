@@ -9,7 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.Config;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
-import net.vakror.jamesconfig.config.config.object.default_objects.setting.SettingConfigObject;
+import net.vakror.jamesconfig.config.config.performance.DefaultConfigPerformanceAnalyzer;
+import net.vakror.jamesconfig.config.config.performance.IConfigPerformanceAnalyzer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -26,7 +27,7 @@ public abstract class SettingConfigImpl extends Config {
     public Map<String, ConfigObject> requiredSettingsMap = new HashMap<>();
 
     @Override
-    public void generateConfig() {
+    public void generateDefaultConfig() {
         this.clear();
         setRequiredSettingsMap();
         this.requiredSettingsMap.forEach(this::setValue);
@@ -40,6 +41,7 @@ public abstract class SettingConfigImpl extends Config {
         configDir = Platform.getConfigFolder().resolve(getSubPath()).toFile();
         return configDir;
     }
+
 
     public final void setRequiredSettingsMap() {
         if (requiredSettingsMap.isEmpty()) {
@@ -74,18 +76,23 @@ public abstract class SettingConfigImpl extends Config {
 
     public abstract String getFileName();
 
+    public Stopwatch loadTime;
+    public Map<String, Stopwatch> parseTime = new HashMap<>();
+
     @Override
     public void readConfig(boolean overrideCurrent) {
         if (shouldReadConfig()) {
             if (!overrideCurrent) {
-                Stopwatch stopwatch = Stopwatch.createStarted();
                 JamesConfigMod.LOGGER.info("Reading config {}", this);
                 try {
                     File file = getConfigFile();
                     if (file.exists()) {
                         try (FileReader reader = new FileReader(file)) {
                             JsonObject jsonObject = (JsonObject) new JsonParser().parse(reader);
+                            Stopwatch stopwatch = Stopwatch.createStarted();
                             List<ConfigObject> configObjects = parse(jsonObject);
+                            stopwatch.stop();
+                            loadTime = stopwatch;
                             JamesConfigMod.LOGGER.info("Setting values in config {} to parsed value", this);
                             for (ConfigObject object : configObjects) {
                                 JamesConfigMod.LOGGER.info("Setting value {} to parsed value in setting config {}", object.getName(), this);
@@ -97,10 +104,10 @@ public abstract class SettingConfigImpl extends Config {
                             System.out.println(e.getClass());
                             e.printStackTrace();
                             JamesConfigMod.LOGGER.warn("Error with config {}, generating new", this);
-                            this.generateConfig();
+                            this.generateDefaultConfig();
                         }
                     } else {
-                        this.generateConfig();
+                        this.generateDefaultConfig();
                         JamesConfigMod.LOGGER.warn("Config " + this.getName() + "not found, generating new");
                     }
                 } catch (JsonIOException | JsonSyntaxException e) {
@@ -108,7 +115,7 @@ public abstract class SettingConfigImpl extends Config {
                 }
                 JamesConfigMod.LOGGER.info("Finished reading config");
             } else {
-                this.generateConfig();
+                this.generateDefaultConfig();
                 JamesConfigMod.LOGGER.info("Successfully Overwrote config {}", this);
             }
         }
@@ -121,6 +128,7 @@ public abstract class SettingConfigImpl extends Config {
         List<ConfigObject> list = new ArrayList<>();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             String key = entry.getKey();
+            Stopwatch stopwatch = Stopwatch.createStarted();
             if (!requiredSettingsMap.containsKey(key)) {
                 JamesConfigMod.LOGGER.error("Key {} present in config {}, even though it was not requested", key, getFileName());
             } else {
@@ -134,6 +142,8 @@ public abstract class SettingConfigImpl extends Config {
                     e.printStackTrace();
                 }
             }
+            stopwatch.stop();
+            parseTime.put(key, stopwatch);
         }
         JamesConfigMod.LOGGER.info("Finished parsing config");
         return list;
@@ -143,7 +153,6 @@ public abstract class SettingConfigImpl extends Config {
 
     @Override
     public void writeConfig() {
-        Stopwatch stopwatch = Stopwatch.createStarted();
         JamesConfigMod.LOGGER.info("Writing config {}", this);
         File cfgDir = this.getConfigDir();
         if (!cfgDir.exists() && !cfgDir.mkdirs()) {

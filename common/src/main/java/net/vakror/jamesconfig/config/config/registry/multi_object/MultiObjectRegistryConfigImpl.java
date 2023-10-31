@@ -1,5 +1,6 @@
 package net.vakror.jamesconfig.config.config.registry.multi_object;
 
+import com.google.common.base.Stopwatch;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
@@ -16,28 +17,30 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class MultiObjectRegistryConfigImpl extends Config {
 
     public final List<ConfigObject> objects = new ArrayList<>();
 
     @Override
-    public void generateConfig() {
+    public final void generateDefaultConfig() {
         this.resetToDefault();
         this.writeConfig();
     }
 
     @Override
     @NotNull
-    public File getConfigDir() {
+    public final File getConfigDir() {
         File configDir;
         configDir = Platform.getConfigFolder().resolve(getSubPath()).toFile();
         return configDir;
     }
 
     @NotNull
-    public File getConfigFile(String fileName) {
+    public final File getConfigFile(String fileName) {
         File configDir;
         configDir = Platform.getConfigFolder().resolve(getSubPath() + "/" + fileName + ".json").toFile();
         return configDir;
@@ -54,9 +57,58 @@ public abstract class MultiObjectRegistryConfigImpl extends Config {
         return this.getName().toString();
     }
 
+    public Stopwatch loadTime;
+    public Map<String, Stopwatch> parseTime = new HashMap<>();
+
     @Override
-    public void readConfig(boolean overrideCurrent) {
-        readConfig(false, true);
+    public final void readConfig(boolean overrideCurrent) {
+        Stopwatch stopwatch1 = Stopwatch.createStarted();
+        if (shouldReadConfig()) {
+            if (!overrideCurrent) {
+                JamesConfigMod.LOGGER.info("Reading configs: " + this.getName());
+                File[] configFiles = this.getConfigDir().listFiles(File::isFile);
+                if (configFiles != null && configFiles.length != 0) {
+                    for (File file : configFiles) {
+                        try (FileReader reader = new FileReader(file)) {
+                            Stopwatch stopwatch = Stopwatch.createStarted();
+                            JamesConfigMod.LOGGER.info("Reading config object {} for config {}", this, file.getName());
+                            JsonObject jsonObject = (JsonObject) new JsonParser().parse(reader); /*we are doing this the deprecated way for 1.17.1 compat*/
+                            currentFile = file;
+                            List<ConfigObject> configObjects = parse(jsonObject);
+                            if (configObjects != null) {
+                                for (ConfigObject object : configObjects) {
+                                    if (object != null) {
+                                        add(object);
+                                    }
+                                }
+                            }
+                            stopwatch.stop();
+                            parseTime.put(file.getName(), stopwatch);
+                            JamesConfigMod.LOGGER.info("Finished reading config object {}", file.getName());
+                        } catch (IOException e) {
+                            System.out.println(e.getClass());
+                            e.printStackTrace();
+                            JamesConfigMod.LOGGER.warn("Error with object {} in config {}, generating new", file.getName(), this);
+                            this.generateDefaultConfig();
+                        }
+                    }
+                    currentFile = null;
+                } else {
+                    this.generateDefaultConfig();
+                    JamesConfigMod.LOGGER.warn("Config " + this.getName() + "not found, generating new");
+                }
+                JamesConfigMod.LOGGER.info("Finished reading config");
+            } else {
+                this.generateDefaultConfig();
+                JamesConfigMod.LOGGER.info("Successfully Overwrote config {}", this);
+            }
+            if (!this.isValid()) {
+                JamesConfigMod.LOGGER.error("Config {} was found to be invalid, discarding all values", this.getName());
+                this.clear();
+            }
+        }
+        stopwatch1.stop();
+        loadTime = stopwatch1;
     }
 
     public abstract boolean isValueAcceptable(ConfigObject value);
@@ -68,64 +120,9 @@ public abstract class MultiObjectRegistryConfigImpl extends Config {
     public abstract boolean isValid();
 
     private File currentFile = null;
-    public void readConfig(boolean overrideCurrent, boolean shouldCallAgain) {
-        if (shouldReadConfig()) {
-            if (!overrideCurrent) {
-                JamesConfigMod.LOGGER.info("Reading configs: " + this.getName());
-                File[] configFiles = this.getConfigDir().listFiles(File::isFile);
-                if (configFiles != null && configFiles.length != 0) {
-                    for (File file : configFiles) {
-                        try (FileReader reader = new FileReader(file)) {
-                            JamesConfigMod.LOGGER.info("Reading config object {} for config {}", this, file.getName());
-                            JsonObject jsonObject = (JsonObject) new JsonParser().parse(reader);
-                            currentFile = file;
-                            List<ConfigObject> configObjects = parse(jsonObject);
-                            if (configObjects != null) {
-                                for (ConfigObject object : configObjects) {
-                                    if (object != null) {
-                                        add(object);
-                                    }
-                                }
-                            }
-                            JamesConfigMod.LOGGER.info("Finished reading config object {}", file.getName());
-                        } catch (IOException e) {
-                            System.out.println(e.getClass());
-                            e.printStackTrace();
-                            JamesConfigMod.LOGGER.warn("Error with object {} in config {}, generating new", file.getName(), this);
-                            this.generateConfig();
-                            if (shouldCallAgain) {
-                                this.objects.clear();
-                                readConfig(false, false);
-                            }
-                        }
-                    }
-                    currentFile = null;
-                } else {
-                    this.generateConfig();
-                    if (shouldCallAgain) {
-                        this.objects.clear();
-                        readConfig(false, false);
-                    }
-                    JamesConfigMod.LOGGER.warn("Config " + this.getName() + "not found, generating new");
-                }
-                JamesConfigMod.LOGGER.info("Finished reading config");
-            } else {
-                this.generateConfig();
-                if (shouldCallAgain) {
-                    this.objects.clear();
-                    readConfig(false, false);
-                }
-                JamesConfigMod.LOGGER.info("Successfully Overwrote config {}", this);
-            }
-            if (!this.isValid()) {
-                JamesConfigMod.LOGGER.error("Config {} was found to be invalid, discarding all values", this.getName());
-                this.clear();
-            }
-        }
-    }
 
     @Override
-    public List<ConfigObject> parse(JsonObject jsonObject) {
+    public final List<ConfigObject> parse(JsonObject jsonObject) {
         if (!jsonObject.has("type") || !jsonObject.get("type").isJsonPrimitive() || !jsonObject.getAsJsonPrimitive("type").isString()) {
             JamesConfigMod.LOGGER.error("Config object {} either does not contain a type field, or the type field is not a string", currentFile.getName());
         } else {
@@ -161,7 +158,7 @@ public abstract class MultiObjectRegistryConfigImpl extends Config {
     protected abstract void resetToDefault();
 
     @Override
-    public void writeConfig() {
+    public final void writeConfig() {
         JamesConfigMod.LOGGER.info("Writing config {}", this);
         File cfgDir = this.getConfigDir();
         if (!cfgDir.exists()) {
@@ -195,7 +192,7 @@ public abstract class MultiObjectRegistryConfigImpl extends Config {
     }
 
     @Override
-    public List<JsonObject> serialize() {
+    public final List<JsonObject> serialize() {
         JamesConfigMod.LOGGER.info("Writing config {} to network", this);
         List<JsonObject> jsonObject = new ArrayList<>();
         for (ConfigObject object : getAll()) {

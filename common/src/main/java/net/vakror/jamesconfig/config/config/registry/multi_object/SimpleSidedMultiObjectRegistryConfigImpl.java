@@ -3,7 +3,13 @@ package net.vakror.jamesconfig.config.config.registry.multi_object;
 import dev.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
+import java.util.Objects;
+
+/**
+ * setting the side to server will ONLY load it when it is on dedicated server, not internal server
+ */
 public abstract class SimpleSidedMultiObjectRegistryConfigImpl extends SimpleMultiObjectRegistryConfigImpl {
     private final EnvType side;
     public SimpleSidedMultiObjectRegistryConfigImpl(EnvType side, String subPath, ResourceLocation name) {
@@ -22,15 +28,7 @@ public abstract class SimpleSidedMultiObjectRegistryConfigImpl extends SimpleMul
     }
 
     @Override
-    public boolean shouldReadConfig() {
-        if (side == null) {
-            return true;
-        }
-        if (side == EnvType.CLIENT) {
-            //TODO:make sure this evn check is correct?
-            return Platform.getEnv().equals(EnvType.CLIENT);
-        } else {
-            return Platform.getEnv().equals(EnvType.SERVER);
-        }
+    public boolean shouldLoad() {
+        return Objects.equals(Platform.getEnv(), side);
     }
 }
