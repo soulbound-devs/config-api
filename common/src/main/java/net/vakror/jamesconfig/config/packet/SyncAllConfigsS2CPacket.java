@@ -20,27 +20,37 @@ public class SyncAllConfigsS2CPacket {
     }
 
     public SyncAllConfigsS2CPacket(FriendlyByteBuf buf) {
-        this.configs = Multimaps.newMultimap(new HashMap<>(), ArrayList::new);
-        byte[] data = buf.readByteArray();
-        JsonArray object = (JsonArray) new JsonParser().parse(new String(data));
-        for (JsonElement element : object) {
-            JsonObject object1 = (JsonObject) element;
-            Config config = JamesConfigMod.CONFIGS.get(new ResourceLocation(object1.get("configName").getAsString()));
-            if (config != null) {
-                List<ConfigObject> parsed = config.parse((JsonObject) object1.get("object"));
-                if (parsed != null) {
-                    for (ConfigObject configObject : parsed) {
-                        configs.put(config.getName(), configObject);
+        configs = Multimaps.newMultimap(new HashMap<>(), ArrayList::new);
+        try {
+            byte[] data = buf.readByteArray();
+            JsonArray object = (JsonArray) new JsonParser().parse(new String(data));
+            for (JsonElement element : object) {
+                JsonObject object1 = (JsonObject) element;
+                Config config = JamesConfigMod.CONFIGS.get(new ResourceLocation(object1.get("configName").getAsString()));
+                if (config != null) {
+                    List<ConfigObject> parsed = config.parse((JsonObject) object1.get("object"));
+                    if (parsed != null) {
+                        for (ConfigObject configObject : parsed) {
+                            configs.put(config.getName(), configObject);
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            JamesConfigMod.LOGGER.error("Exception caught while syncing config");
+            e.printStackTrace();
         }
     }
 
     public void encode(FriendlyByteBuf buf) {
-        JsonArray object = new JsonArray();
-        configs.keySet().forEach(((location) -> serializeObject(location, object)));
-        buf.writeByteArray(object.toString().getBytes());
+        try {
+            JsonArray object = new JsonArray();
+            configs.keySet().forEach(((location) -> serializeObject(location, object)));
+            buf.writeByteArray(object.toString().getBytes());
+        } catch (Exception e) {
+            JamesConfigMod.LOGGER.error("Exception caught while syncing config");
+            e.printStackTrace();
+        }
     }
 
     public void serializeObject(ResourceLocation location, JsonArray array) {

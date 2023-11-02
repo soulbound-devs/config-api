@@ -10,15 +10,18 @@ import net.minecraft.server.level.ServerPlayer;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.Config;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ArchModPackets {
     public static final ResourceLocation syncPacketId = new ResourceLocation(JamesConfigMod.MOD_ID,"config_sync_packet");
+    public static final ResourceLocation reloadPacketId = new ResourceLocation(JamesConfigMod.MOD_ID,"reload_config_packet");
 
     public static void register(){
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, syncPacketId,(buf, context)-> new SyncAllConfigsS2CPacket(buf).handle());
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, reloadPacketId,(buf, context)-> new ReloadConfigS2CPacket(buf).handle());
     }
 
     public static void onLogIn(ServerPlayer player){
@@ -30,5 +33,12 @@ public class ArchModPackets {
         SyncAllConfigsS2CPacket syncAllConfigsS2CPacket = new SyncAllConfigsS2CPacket(map);
         syncAllConfigsS2CPacket.encode(buf);
         NetworkManager.sendToPlayer(player, syncPacketId, buf);
+    }
+
+    public static void sendReloadPacket(ServerPlayer player, @NotNull ResourceLocation configToSync) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        ReloadConfigS2CPacket reloadConfigS2CPacket = new ReloadConfigS2CPacket(configToSync);
+        reloadConfigS2CPacket.encode(buf);
+        NetworkManager.sendToPlayer(player, reloadPacketId, buf);
     }
 }

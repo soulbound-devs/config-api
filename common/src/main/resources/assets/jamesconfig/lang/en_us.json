@@ -1,3 +1,6 @@
 {
-  "config.analyze.success": "Saved config analysis to %s, took %s"
+  "config.analyze.success": "Saved config analysis to %s, took %s",
+  "config.reload.remote.success": "Reloaded Remote Config \"%s\" Successfully, took %s",
+  "config.reload.local.success": "Reloaded Local Config \"%s\" Successfully, took %s",
+  "config.invalid_location": "§cInvalid Config Name: \"%s§c\""
 }

@@ -15,6 +15,8 @@ public class CommandManager extends SimpleManager<Command> {
     public static class ModEvents {
         private ModEvents(CommandManager manager) {
             CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> manager.getAll().forEach((command) -> dispatcher.register(command.register())));
+            CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> {
+            });
         }
     }
 }

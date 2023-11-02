@@ -18,7 +18,7 @@ public class AnalyzeConfigPerformanceCommand implements Command {
     public LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("config")
                 .then(Commands.literal("analyze")
-                        .requires(commandSourceStack -> commandSourceStack.hasPermission(0))
+                        .requires(commandSourceStack -> commandSourceStack.hasPermission(Commands.LEVEL_MODERATORS))
                         .executes(this::execute));
     }
 

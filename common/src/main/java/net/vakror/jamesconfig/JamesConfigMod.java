@@ -1,8 +1,14 @@
 package net.vakror.jamesconfig;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.vakror.jamesconfig.config.config.Config;
 import net.vakror.jamesconfig.config.config.commands.JamesConfigCommands;
@@ -22,6 +28,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public class JamesConfigMod
 {
@@ -71,6 +79,19 @@ public class JamesConfigMod
 
 	public static void analyzePerformance() {
 		CONFIGS.values().forEach(Config::analyzeConfigPerformance);
+	}
+
+	public static SuggestionProvider<CommandSourceStack> buildConfigSuggestions() {
+		return (context, suggestionsBuilder) -> {
+            StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
+            stringReader.setCursor(suggestionsBuilder.getStart());
+            Function<SuggestionsBuilder, CompletableFuture<Suggestions>> function = JamesConfigMod::suggestConfig;
+            return function.apply(suggestionsBuilder.createOffset(stringReader.getCursor()));
+        };
+	}
+
+	private static CompletableFuture<Suggestions> suggestConfig(SuggestionsBuilder suggestionsBuilder) {
+		return SharedSuggestionProvider.suggestResource(JamesConfigMod.CONFIGS.keySet(), suggestionsBuilder);
 	}
 
 	private void commonSetup() {
