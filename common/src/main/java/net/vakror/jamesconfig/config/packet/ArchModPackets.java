@@ -7,6 +7,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.Config;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
@@ -40,5 +41,16 @@ public class ArchModPackets {
         ReloadConfigS2CPacket reloadConfigS2CPacket = new ReloadConfigS2CPacket(configToSync);
         reloadConfigS2CPacket.encode(buf);
         NetworkManager.sendToPlayer(player, reloadPacketId, buf);
+    }
+
+    public static void sendSyncPacket(Iterable<ServerPlayer> players) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        Multimap<ResourceLocation, ConfigObject> map = Multimaps.newMultimap(new HashMap<>(), ArrayList::new);
+        for (Config config : JamesConfigMod.CONFIGS.values().stream().filter(Config::shouldSync).toList()) {
+            map.putAll(config.getName(), config.getAll());
+        }
+        SyncAllConfigsS2CPacket syncAllConfigsS2CPacket = new SyncAllConfigsS2CPacket(map);
+        syncAllConfigsS2CPacket.encode(buf);
+        NetworkManager.sendToPlayers(players, syncPacketId, buf);
     }
 }
