@@ -43,12 +43,28 @@ public class ArchModPackets {
         NetworkManager.sendToPlayer(player, reloadPacketId, buf);
     }
 
+    public static void sendReloadPacket(ServerPlayer player) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        ReloadConfigS2CPacket reloadConfigS2CPacket = new ReloadConfigS2CPacket(JamesConfigMod.CONFIGS.keySet().stream().toList());
+        reloadConfigS2CPacket.encode(buf);
+        NetworkManager.sendToPlayer(player, reloadPacketId, buf);
+    }
+
     public static void sendSyncPacket(Iterable<ServerPlayer> players) {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         Multimap<ResourceLocation, ConfigObject> map = Multimaps.newMultimap(new HashMap<>(), ArrayList::new);
         for (Config config : JamesConfigMod.CONFIGS.values().stream().filter(Config::shouldSync).toList()) {
             map.putAll(config.getName(), config.getAll());
         }
+        SyncAllConfigsS2CPacket syncAllConfigsS2CPacket = new SyncAllConfigsS2CPacket(map);
+        syncAllConfigsS2CPacket.encode(buf);
+        NetworkManager.sendToPlayers(players, syncPacketId, buf);
+    }
+
+    public static void sendSyncPacket(Iterable<ServerPlayer> players, ResourceLocation location) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        Multimap<ResourceLocation, ConfigObject> map = Multimaps.newMultimap(new HashMap<>(), ArrayList::new);
+        map.putAll(location, JamesConfigMod.CONFIGS.get(location).getAll());
         SyncAllConfigsS2CPacket syncAllConfigsS2CPacket = new SyncAllConfigsS2CPacket(map);
         syncAllConfigsS2CPacket.encode(buf);
         NetworkManager.sendToPlayers(players, syncPacketId, buf);

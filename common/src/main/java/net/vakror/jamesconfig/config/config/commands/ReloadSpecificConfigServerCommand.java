@@ -22,11 +22,12 @@ public class ReloadSpecificConfigServerCommand implements Command {
     public LiteralArgumentBuilder<CommandSourceStack> register() {
         return Commands.literal("config")
                 .then(Commands.literal("reload")
-                        .then(Commands.literal("remote")
-                                .then((Commands.argument("config", new ResourceLocationArgument()).suggests(JamesConfigMod.buildConfigSuggestions()))
-                                        .then(Commands.argument("syncToClients", BoolArgumentType.bool())
-                                                .requires(commandSourceStack -> commandSourceStack.hasPermission(Commands.LEVEL_MODERATORS))
-                                                .executes(this::execute)))));
+                        .then(Commands.literal("single")
+                                .then(Commands.literal("server")
+                                        .then((Commands.argument("config", new ResourceLocationArgument()).suggests(JamesConfigMod.buildConfigSuggestions()))
+                                                .then(Commands.argument("syncToClients", BoolArgumentType.bool())
+                                                        .requires(commandSourceStack -> commandSourceStack.hasPermission(Commands.LEVEL_MODERATORS))
+                                                        .executes(this::execute))))));
     }
 
     private int execute(CommandContext<CommandSourceStack> context) {
@@ -44,9 +45,10 @@ public class ReloadSpecificConfigServerCommand implements Command {
             } else {
                 MutableComponent component = Component.literal(location.toString()).withStyle(Style.EMPTY.withColor(ChatFormatting.RED).withUnderlined(true));
                 Objects.requireNonNull(context.getSource().getEntity()).sendSystemMessage(Component.translatable("config.invalid_location", component));
+                return 0;
             }
             if (syncToClients) {
-                ArchModPackets.sendSyncPacket(context.getSource().getLevel().players());
+                ArchModPackets.sendSyncPacket(context.getSource().getLevel().players(), location);
             }
         } catch (Exception e) {
             e.printStackTrace();

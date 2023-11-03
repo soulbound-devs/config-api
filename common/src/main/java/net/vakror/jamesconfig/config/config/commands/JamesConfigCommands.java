@@ -7,5 +7,7 @@ public class JamesConfigCommands {
         CommandManager.INSTANCE.register(new AnalyzeConfigPerformanceCommand());
         CommandManager.INSTANCE.register(new ReloadSpecificConfigServerCommand());
         CommandManager.INSTANCE.register(new ReloadSpecificConfigClientCommand());
+        CommandManager.INSTANCE.register(new ReloadAllConfigsServerCommand());
+        CommandManager.INSTANCE.register(new ReloadAllConfigsClientCommand());
     }
 }

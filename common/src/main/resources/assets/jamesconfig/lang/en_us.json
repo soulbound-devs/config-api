@@ -2,5 +2,8 @@
   "config.analyze.success": "Saved config analysis to %s, took %s",
   "config.reload.remote.success": "Reloaded Remote Config \"%s\" Successfully, took %s",
   "config.reload.local.success": "Reloaded Local Config \"%s\" Successfully, took %s",
-  "config.invalid_location": "§cInvalid Config Name: \"%s§c\""
+  "config.reload.all.local.success": "Reloaded All Local Configs Successfully, took %s",
+  "config.reload.all.remote.success": "Reloaded All Remote Configs Successfully, took %s",
+  "config.invalid_location": "§cInvalid Config Name: \"%s§c\"",
+  "config.not_present_on_client": "§cConfig \"%s§c\" is not present on client side"
 }
