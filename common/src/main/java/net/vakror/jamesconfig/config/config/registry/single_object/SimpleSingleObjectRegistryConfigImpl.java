@@ -2,7 +2,6 @@ package net.vakror.jamesconfig.config.config.registry.single_object;
 
 import dev.architectury.platform.Platform;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import net.vakror.jamesconfig.JamesConfigMod;
 import net.vakror.jamesconfig.config.config.object.ConfigObject;
 
