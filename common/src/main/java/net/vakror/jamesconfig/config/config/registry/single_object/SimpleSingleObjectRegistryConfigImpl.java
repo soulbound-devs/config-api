@@ -33,7 +33,7 @@ public abstract class SimpleSingleObjectRegistryConfigImpl<P extends ConfigObjec
     }
 
     @Override
-    public boolean isValueAcceptable(ConfigObject value) {
+    public boolean isValueAcceptable(P value) {
         return true;
     }
 
@@ -60,12 +60,12 @@ public abstract class SimpleSingleObjectRegistryConfigImpl<P extends ConfigObjec
     }
 
     @Override
-    public void discardValue(ConfigObject object) {
+    public void discardValue(P object) {
         objects.remove(object);
     }
     
     @Override
-    public boolean shouldAddObject(ConfigObject object) {
+    public boolean shouldAddObject(P object) {
         return true;
     }
 
